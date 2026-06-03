@@ -22,8 +22,8 @@ public class NauSparse{
 		  refine_sg,
 		  cheapautom_sg,
 		   targetcell_sg,
-		   nausparse_freedyn,
-		   nausparse_check,
+		   nausparse_freedyn, -> irrelevant GC
+		   nausparse_check, -> probably could ignore
 		   init_sg,NULL
 		   };
 		*/
@@ -677,11 +677,154 @@ public class NauSparse{
 		longcode = mash(longcode, numcells.val);
 		code.val = cleanup(longcode);
 	}
+	
+	/**
+	 * cheapautom_sg(ptn,level,digraph,n) returns TRUE if the partition at the
+	 * specified level in the partition nest (lab,ptn) {lab is not needed here}
+	 * satisfies a simple sufficient condition for its cells to be the orbits of
+	 * some subgroup of the automorphism group.  Otherwise it returns FALSE.
+	 * It always returns FALSE if digraph!=FALSE.
+	 * 
+	 * nauty assumes that this function will always return TRUE for any
+	 * partition finer than one for which it returns TRUE.
+	 */
+	boolean cheapautom_sg(int[] ptn, int level, boolean digraph, int n){
+		int i, k, nnt;
 
-//	  cheapautom_sg,
-//	   targetcell_sg,
-//	   nausparse_freedyn,
-//	   nausparse_check,
+		if(digraph){
+			return false;
+		}
+
+		k = n;
+		nnt = 0;
+		for(i = 0; i < n; ++i){
+			--k;
+			if(ptn[i] > level){
+				++nnt;
+				while(ptn[++i] > level){
+				}
+			}
+		}
+
+		return (k <= nnt + 1 || k <= 4);
+	}
+	
+	/**
+	 * bestcell_sg(g,lab,ptn,level,tc_level,m,n) returns the index in lab of
+	 * the start of the "best non-singleton cell" for fixing.  If there is no
+	 * non-singleton cell it returns n.
+	 * This implementation finds the first cell which is non-trivially joined
+	 * to the greatest number of other cells, assuming equitability.
+	 * This is not good for digraphs!
+	 */
+	int bestcell_sg(SparseGraph g, int[] lab, int[] ptn, int level, int tc_level, int m, int n){
+		int nnt;
+		int[] d = g.d;
+		int[] e = g.e;
+		int i, k, di;
+		int maxcnt;
+		int[] v = g.v;
+		int vi, j;
+
+		work1 = Nauty.dynAlloc1(work1, n);
+		work2 = Nauty.dynAlloc1(work2, n);
+		work3 = Nauty.dynAlloc1(work3, n);
+		work4 = Nauty.dynAlloc1(work4, n);
+		final int sizeOffset = n / 2;//alternative to work1b
+//	    work1b = work1 + (n/2);
+		final int[] START = work1;
+//	    #define SIZE     work1b
+		final int[] NNTCELL = work2;
+		final int[] HITS = work3;
+		final int[] COUNT = work4;
+
+		/* find non-singleton cells: put starts in START[0..nnt-1],
+		  sizes in SIZE[0..nnt-1].
+		  Also NNTCELL[i] = n if {i} is a singelton, else index of
+		  nontriv cell containing i. */
+
+		i = nnt = 0;
+
+		while(i < n){
+			if(ptn[i] > level){
+				START[nnt] = i;
+				j = i;
+				do{
+					NNTCELL[lab[j]] = nnt;
+				}while(ptn[j++] > level);
+				START[sizeOffset + nnt] = j - i;
+				++nnt;
+				i = j;
+			}else{
+				NNTCELL[lab[i]] = n;
+				++i;
+			}
+		}
+
+		if(nnt == 0){
+			return n;
+		}
+
+		/* set COUNT[i] to # non-trivial neighbours of n.s. cell i */
+
+		for(i = 0; i < nnt; ++i){
+			HITS[i] = COUNT[i] = 0;
+		}
+
+		for(i = 0; i < nnt; ++i){
+			vi = v[lab[START[i]]];
+			di = d[lab[START[i]]];
+
+			for(j = 0; j < di; ++j){
+				k = NNTCELL[e[vi + j]];
+				if(k != n){
+					++HITS[k];
+				}
+			}
+			for(j = 0; j < di; ++j){
+				k = NNTCELL[e[vi + j]];
+				if(k != n){
+					if(HITS[k] > 0 && HITS[k] < START[sizeOffset + k]){
+						++COUNT[i];
+					}
+					HITS[k] = 0;
+				}
+			}
+		}
+
+		/* find first greatest bucket value */
+
+		j = 0;
+		maxcnt = COUNT[0];
+		for(i = 1; i < nnt; ++i)
+			if(COUNT[i] > maxcnt){
+				j = i;
+				maxcnt = COUNT[i];
+			}
+
+		return START[j];
+	}
+	
+	/**
+	 * targetcell_sg(g,lab,ptn,level,tc_level,digraph,hint,m,n) returns the
+	 * index in lab of the next cell to split.
+	 * hint is a suggestion for the answer, which is obeyed if it is valid.
+	 * Otherwise we use bestcell() up to tc_level and the first non-trivial
+	 * cell after that.
+	 */
+	int targetcell_sg(SparseGraph g, int[] lab, int[] ptn, int level, int tc_level, boolean digraph, int hint, int m, int n){
+		int i;
+
+		if(hint >= 0 && ptn[hint] > level && (hint == 0 || ptn[hint - 1] <= level)){
+			return hint;
+		}else if(level <= tc_level){
+			return bestcell_sg(g, lab, ptn, level, tc_level, m, n);
+		}else{
+			for(i = 0; i < n && ptn[i] <= level; ++i){
+			}
+			return (i == n ? 0 : i);
+		}
+	}
 
 	/**
 	 * expression whose long value depends only on long l and int/long i.
