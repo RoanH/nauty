@@ -1,0 +1,27 @@
+package dev.roanh.nauty.struct;
+
+public class DispatchVec{
+	    boolean (*isautom)        /* test for automorphism */
+	            (graph*,int*,boolean,int,int);
+	    int     (*testcanlab)     /* test for better labelling */
+	            (graph*,graph*,int*,int*,int,int);
+	    void    (*updatecan)      /* update canonical object */
+	            (graph*,graph*,int*,int,int,int);
+	    void    (*refine)         /* refine partition */
+	            (graph*,int*,int*,int,int*,int*,set*,int*,int,int);
+	    void    (*refine1)        /* refine partition, MAXM==1 */
+	            (graph*,int*,int*,int,int*,int*,set*,int*,int,int);
+	    boolean (*cheapautom)     /* test for easy automorphism */
+	            (int*,int,boolean,int);
+	    int     (*targetcell)     /* decide which cell to split */
+	            (graph*,int*,int*,int,int,boolean,int,int,int);
+	    void    (*freedyn)(void); /* free dynamic memory */
+	    void    (*check)          /* check compilation parameters */
+	            (int,int,int,int);
+	    void    (*init)(graph*,graph**,graph*,graph**,int*,int*,set*,
+	                   struct optionstruct*,int*,int,int);
+	    void    (*cleanup)(graph*,graph**,graph*,graph**,int*,int*,
+	                      struct optionstruct*,statsblk*,int,int);
+	    
+	    //note: optionstruct == optionblk
+}

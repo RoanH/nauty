@@ -1,0 +1,10 @@
+MAXN will not be set, for more than 64 vertices there is no point, and while 64 is usually good enough, we might need more
+WORDSIZE ... very C, JVM operates in at least 32 bits so lets go with that, int gets more optimisations anyway
+- ^ makes my setword's unsigned ints, but I should really delegate that to BitSet anyway, which uses a long vector
+size_t -> use int
+int -> use int
+NAUTY_IN_MAGMA -> false
+graph -> just use sparse graph, we don't support dense nauty
+n -> vertices
+m -> st words needed for n, probably will be abstracted away in my version
+SG_WEIGHT/sg_weight -> int
