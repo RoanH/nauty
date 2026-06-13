@@ -4,53 +4,53 @@ public class StatsBlk{
 	/**
 	 * Size of group is.
 	 */
-	double grpsize1;
+	public double grpsize1;
 	/**
 	 * grpsize1 * 10^grpsize2
 	 */
-	int grpsize2;
+	public int grpsize2;
 	/**
 	 * Number of orbits in group.
 	 */
-	int numorbits;
+	public int numorbits;
 	/**
 	 * Number of generators found.
 	 */
-	int numgenerators;
+	public int numgenerators;
 	/**
 	 * If non-zero : an error code.
 	 */
-	int errstatus;
+	public int errstatus;
 	/**
 	 * Total number of nodes.
 	 */
-	long numnodes;
+	public long numnodes;
 	/**
 	 * Number of leaves of no use.
 	 */
-	long numbadleaves;
+	public long numbadleaves;
 	/**
 	 * Maximum depth of search.
 	 */
-	int maxlevel;
+	public int maxlevel;
 	/**
 	 * Total size of all target cells.
 	 */
-	long tctotal;
+	public long tctotal;
 	/**
 	 * Number of updates of best label.
 	 */
-	long canupdates;
+	public long canupdates;
 	/**
 	 * Number of applications of invarproc .
 	 */
-	long invapplics;
+	public long invapplics;
 	/**
 	 * Number of successful uses of invarproc().
 	 */
-	long invsuccesses;
+	public long invsuccesses;
 	/**
 	 * Least level where invarproc worked.
 	 */
-	int invarsuclevel;
+	public int invarsuclevel;
 }

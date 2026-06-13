@@ -1,4 +1,4 @@
-MAXN will not be set, for more than 64 vertices there is no point, and while 64 is usually good enough, we might need more
+MAXN will not be set, for more than 64 vertices there is no point, and while 64 is usually good enough, we might need more, so keep !MAXN branches
 WORDSIZE ... very C, JVM operates in at least 32 bits so lets go with that, int gets more optimisations anyway
 - ^ makes my setword's unsigned ints, but I should really delegate that to BitSet anyway, which uses a long vector
 size_t -> use int
@@ -8,3 +8,19 @@ graph -> just use sparse graph, we don't support dense nauty
 n -> vertices
 m -> st words needed for n, probably will be abstracted away in my version
 SG_WEIGHT/sg_weight -> int
+
+My call:
+static DEFAULTOPTIONS_SPARSEDIGRAPH(options);
+statsblk stats;
+options.getcanon = TRUE;
+options.defaultptn = FALSE;
+
+#define DEFAULTOPTIONS_SPARSEDIGRAPH(options) optionblk options = \
+ {0,TRUE,FALSE,FALSE,TRUE,FALSE,CONSOLWIDTH, \
+  NULL,NULL,NULL,NULL,NULL,NULL,adjacencies_sg,100,0,999,0,&dispatch_sparse,FALSE,NULL}
+
+Leave schreier disabled for now... it's unlikely to help significantly and a lot of work to implement. Leave todos in relevant places though
+	
+nauSparse IS the dispatch vector
+
+#define OPTCALL(proc) if (proc != NULL) (*proc)

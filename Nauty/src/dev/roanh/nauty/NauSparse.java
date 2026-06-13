@@ -13,20 +13,21 @@ public class NauSparse{
 	//#define SG_VDE(sgp,vv,dd,ee) do { vv = ((sparsegraph*)(sgp))->v; \
 	//  dd = ((sparsegraph*)(sgp))->d; ee = ((sparsegraph*)(sgp))->e; } while(0)
 
+	
 	/*	DispatchVec dispatch_sparse =
-		  {
-		  isautom_sg,
-		  testcanlab_sg,
-		  updatecan_sg,
-		  refine_sg,
-		  refine_sg,
-		  cheapautom_sg,
-		   targetcell_sg,
-		   nausparse_freedyn, -> irrelevant GC
-		   nausparse_check, -> probably could ignore
-		   init_sg,NULL
-		   };
-		*/
+	  {
+	  isautom_sg,
+	  testcanlab_sg,
+	  updatecan_sg,
+	  refine_sg,
+	  refine_sg,
+	  cheapautom_sg,
+	   targetcell_sg,
+	   nausparse_freedyn, -> irrelevant GC
+	   nausparse_check, -> probably could ignore
+	   init_sg,NULL
+	   };
+	*/
 
 	private final MarkVal vmark1 = new MarkVal();
 	private final MarkVal vmark2 = new MarkVal();
@@ -37,13 +38,15 @@ public class NauSparse{
 
 	public static void sparsenauty(SparseGraph g, int[] lab, int[] ptn, int[] orbits, OptionBlk options, StatsBlk stats, SparseGraph h){
 
+		//TODO nauty probably extend Nauty for that
 	}
 
 	/**
 	 * isautom_sg(g,perm,digraph,m,n) = TRUE iff perm is an automorphism of g
 	 * (i.e., g^perm = g).  Symmetry is assumed unless digraph = TRUE.
 	 */
-	boolean is_autom_sg(SparseGraph g, int[] p, boolean digraph, int m, int n){
+//	public boolean isautom_sg(SparseGraph g, int[] p, boolean digraph, int m, int n){
+	public boolean isautom_sg(SparseGraph g, int[] p, boolean digraph, int n){
 		int[] d = g.d;
 		int[] e = g.e;
 		int[] v = g.v;
@@ -83,7 +86,8 @@ public class NauSparse{
 	 * value returned is -1,0,1 if g^lab <,=,> canong.  *samerows is set to
 	 * the number of rows (0..n) of canong which are the same as those of g^lab.
 	 */
-	int testcanlab_sg(SparseGraph g, SparseGraph canong, int[] lab, IntPtr samerows, int m, int n){
+//	public int testcanlab_sg(SparseGraph g, SparseGraph canong, int[] lab, IntPtr samerows, int m, int n){
+	public int testcanlab_sg(SparseGraph g, SparseGraph canong, int[] lab, IntPtr samerows, int n){
 		int[] d = g.d;
 		int[] e = g.e;
 		int[] cd = canong.d;
@@ -154,7 +158,8 @@ public class NauSparse{
 	 * the first samerows vertices of canong are ok already.  Also assumes
 	 * contiguity and ample space in canong.
 	 */
-	void updatecan_sg(SparseGraph g, SparseGraph canong, int[] lab, int samerows, int m, int n){
+//	public void updatecan_sg(SparseGraph g, SparseGraph canong, int[] lab, int samerows, int m, int n){
+	public void updatecan_sg(SparseGraph g, SparseGraph canong, int[] lab, int samerows, int n){
 		int[] d = g.d;
 		int[] e = g.e;
 		int[] cd = canong.d;
@@ -189,15 +194,35 @@ public class NauSparse{
 			}
 		}
 	}
+	
+	/**
+	 * init_sg(graph *gin, graph **gout, graph *hin, graph **hout,
+	 *         int *lab, int *ptn, set *active, optionblk *options,
+	 *         int *status, int m, int n)
+	 * Initialise routine for dispatch vector.  This one just makes sure
+	 * that *hin has enough space and sets fields for n=0.
+	 */
+//	public void init_sg(SparseGraph gin, SparseGraph[] gout, SparseGraph hin, SparseGraph[] hout, int[] lab, int[] ptn, NSet active, OptionBlk options, IntPtr status, int m, int n){
+	public void init_sg(SparseGraph gin, SparseGraph hin, OptionBlk options, IntPtr status){
+		SparseGraph sg;
+		SparseGraph sh;
 
-//	   init_sg TODO
+		if(options.getcanon){
+			sg = gin;
+			sh = hin;
+			SparseGraph.sgAlloc(sh, sg.nv, sg.nde);
+			sh.nv = sg.nv;
+			sh.nde = sg.nde;
+		}
+		status.val = 0;
+	}
 
 	/**
 	 * distvals(sparsegraph *sg, int v0, int *dist, int n) sets dist[i]
 	 * to the distance from v0 to i, for each i, or to n if there is no such
 	 * distance.  work4[] is used as a queue.
 	 */
-	void distvals(SparseGraph g, int v0, int[] dist, int n){
+	private void distvals(SparseGraph g, int v0, int[] dist, int n){
 		int[] d = g.d;
 		int[] e = g.e;
 		int i, head, tail;
@@ -244,7 +269,8 @@ public class NauSparse{
 	 * algorithm, but which is independent of the labelling of the graph.
 	 * count is used for work space.
 	 */
-	void refine_sg(SparseGraph g, int[] lab, int[] ptn, int level, IntPtr numcells, IntPtr count, NSet active, IntPtr code, int m/*obsolete?*/, int n){
+//	public void refine_sg(SparseGraph g, int[] lab, int[] ptn, int level, IntPtr numcells, IntPtr count, NSet active, IntPtr code, int m, int n){
+	public void refine_sg(SparseGraph g, int[] lab, int[] ptn, int level, IntPtr numcells, NSet active, IntPtr code, int n){
 		int i, j, k, l, v1, v2, v3, isplit;
 		int w1, w2, w3;
 		long longcode;
@@ -688,7 +714,7 @@ public class NauSparse{
 	 * nauty assumes that this function will always return TRUE for any
 	 * partition finer than one for which it returns TRUE.
 	 */
-	boolean cheapautom_sg(int[] ptn, int level, boolean digraph, int n){
+	public boolean cheapautom_sg(int[] ptn, int level, boolean digraph, int n){
 		int i, k, nnt;
 
 		if(digraph){
@@ -717,7 +743,8 @@ public class NauSparse{
 	 * to the greatest number of other cells, assuming equitability.
 	 * This is not good for digraphs!
 	 */
-	int bestcell_sg(SparseGraph g, int[] lab, int[] ptn, int level, int tc_level, int m, int n){
+//	public int bestcell_sg(SparseGraph g, int[] lab, int[] ptn, int level, int tc_level, int m, int n){
+	public int bestcell_sg(SparseGraph g, int[] lab, int[] ptn, int level, int n){
 		int nnt;
 		int[] d = g.d;
 		int[] e = g.e;
@@ -812,13 +839,14 @@ public class NauSparse{
 	 * Otherwise we use bestcell() up to tc_level and the first non-trivial
 	 * cell after that.
 	 */
-	int targetcell_sg(SparseGraph g, int[] lab, int[] ptn, int level, int tc_level, boolean digraph, int hint, int m, int n){
+//	public int targetcell_sg(SparseGraph g, int[] lab, int[] ptn, int level, int tc_level, boolean digraph, int hint, int m, int n){
+	public int targetcell_sg(SparseGraph g, int[] lab, int[] ptn, int level, int tc_level, int hint, int n){
 		int i;
 
 		if(hint >= 0 && ptn[hint] > level && (hint == 0 || ptn[hint - 1] <= level)){
 			return hint;
 		}else if(level <= tc_level){
-			return bestcell_sg(g, lab, ptn, level, tc_level, m, n);
+			return bestcell_sg(g, lab, ptn, level, n);
 		}else{
 			for(i = 0; i < n && ptn[i] <= level; ++i){
 			}
