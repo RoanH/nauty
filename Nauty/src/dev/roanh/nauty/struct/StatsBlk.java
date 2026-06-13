@@ -20,6 +20,7 @@ public class StatsBlk{
 	/**
 	 * If non-zero : an error code.
 	 */
+	@Deprecated//prefer throws probably?
 	public int errstatus;
 	/**
 	 * Total number of nodes.

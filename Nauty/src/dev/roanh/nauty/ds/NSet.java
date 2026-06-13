@@ -26,4 +26,9 @@ public class NSet{
 	public boolean isElement(int pos){
 		return set.get(pos);
 	}
+	
+	//EMPTYSET
+	public void clear(){
+		set.clear();
+	}
 }
