@@ -8,6 +8,8 @@ import dev.roanh.nauty.struct.SparseGraph;
 import dev.roanh.nauty.struct.StatsBlk;
 
 public class NauSparse{
+	private static final int[] FUZZ1 = new int[]{037541, 061532, 005257, 026416};
+	private static final int[] FUZZ2 = new int[]{006532, 070236, 035523, 062437};
 
 	//just extracts v/d/e
 	//#define SG_VDE(sgp,vv,dd,ee) do { vv = ((sparsegraph*)(sgp))->v; \
@@ -852,6 +854,57 @@ public class NauSparse{
 			}
 			return (i == n ? 0 : i);
 		}
+	}
+	
+	/**
+	 * adjacencies_sg() assigns to each vertex v a code depending on which cells
+	 * it is joined to and from, and how many times.  It is intended to provide
+	 * better partitioning that the normal refinement routine for digraphs.
+	 * It will not help with undirected graphs in nauty at all.
+	 */
+//	public void adjacencies_sg(SparseGraph g, int[] lab, int[] ptn, int level, int numcells, int tvpos, int[] invar, int invararg, boolean digraph, int m, int n){
+	public void adjacencies_sg(SparseGraph g, int[] lab, int[] ptn, int level, int[] invar, int n){
+		int[] d = g.d;
+		int[] e = g.e;
+		int vwt, wwt;
+		int di;
+		int i;
+		int[] v = g.v;
+		int j;
+
+		work2 = Nauty.dynAlloc1(work2, n);
+
+		vwt = 1;
+		for(i = 0; i < n; ++i){
+			work2[lab[i]] = vwt;
+			if(ptn[i] <= level){
+				++vwt;
+			}
+			invar[i] = 0;
+		}
+
+		for(i = 0; i < n; ++i){
+			vwt = fuzz1(work2[i]);
+			wwt = 0;
+			di = d[i];
+			for(j = 0; j < di; ++j){
+				wwt = accum(wwt, fuzz2(work2[e[v[i] + j]]));
+				invar[e[v[i] + j]] = accum(invar[e[v[i] + j]], vwt);
+			}
+			invar[i] = accum(invar[i], wwt);
+		}
+	}
+	
+	private static final int accum(int x, int y){
+		return (((x) + (y)) & 077777);
+	}
+
+	private static final int fuzz1(int x){
+		return ((x) ^ FUZZ1[(x)&3]);
+	}
+	
+	private static final int fuzz2(int x){
+		return ((x) ^ FUZZ2[(x)&3]);
 	}
 
 	/**
