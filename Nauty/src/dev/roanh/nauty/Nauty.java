@@ -322,7 +322,9 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	          TCNode tcnode_parent)
 	{
 	    int tv;
-	    int tv1,index,rtnlevel,tcellsize,tc,childcount;
+	    int tv1,index,rtnlevel,childcount;
+	    IntPtr tcellsize = new IntPtr();
+	    IntPtr tc = new IntPtr();
 	    IntPtr qinvar = new IntPtr();
 	    IntPtr refcode = new IntPtr();
 	    NSet tcell;
@@ -356,16 +358,17 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	        }
 	    }
 
-	    tc = -1;
+	    tc.val = -1;
 	    if (numcells.val != n)
 	    {
 	     /* locate new target cell, setting tc to its position in lab, tcell
 	                      to its contents, and tcellsize to its size: */
-	        maketargetcell(g,lab,ptn,level,tcell,&tcellsize,
-	                        &tc,tc_level,digraph,-1,dispatch.targetcell,M,n);
-	        stats.tctotal += tcellsize;
+//	        maketargetcell(g,lab,ptn,level,tcell,&tcellsize,&tc,tc_level,digraph,-1,dispatch.targetcell,M,n);
+	        naUtil.maketargetcell(g,lab,ptn,level,tcell,tcellsize,
+	                        tc,tc_level,-1,nauSparse,n);
+	        stats.tctotal += tcellsize.val;
 	    }
-	    firsttc[level] = tc;
+	    firsttc[level] = tc.val;
 
 	    /* optionally call user-defined node examination procedure: */
 	    //OPTCALL(usernodeproc)(g,lab,ptn,level,numcells,tc,(int)firstcode[level],M,n);

@@ -29,6 +29,10 @@ public class NSet{
 		return set.get(pos);
 	}
 	
+	public void intersect(NSet other){
+		set.and(other.set);
+	}
+	
 	//EMPTYSET
 	public void clear(){
 		set.clear();

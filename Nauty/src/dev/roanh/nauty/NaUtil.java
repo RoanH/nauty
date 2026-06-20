@@ -111,7 +111,90 @@ public class NaUtil{
 			qinvar.val = 0;
 		}
 	}
+	
+	/**
+	 * maketargetcell(g,lab,ptn,level,tcell,tcellsize,&cellpos,
+	 *                tc_level,digraph,hint,targetcell,m,n)
+	 * calls targetcell() to determine the target cell at the specified level
+	 * in the partition nest (lab,ptn).  It must be a nontrivial cell (if not,
+	 * the first cell.  The intention of hint is that, if hint >= 0 and there
+	 * is a suitable non-trivial cell starting at position hint in lab,
+	 * that cell is chosen.
+	 * tc_level and digraph are input options.
+	 * When a cell is chosen, tcell is set to its contents, *tcellsize to its
+	 * size, and cellpos to its starting position in lab.
+	 * 
+	 * GLOBALS ACCESSED: bit<r>
+	 */
+	public void maketargetcell(
+			SparseGraph g,
+			int[] lab,
+			int[] ptn,
+			int level,
+			NSet tcell,
+			IntPtr tcellsize,
+			IntPtr cellpos,
+			int tc_level,
+//			boolean digraph,
+			int hint,
+			NauSparse nauSparse,
+		    	//int (*targetcell)(graph*,int*,int*,int,int,boolean,int,int,int), -> targetcell_sg
+//		    int m,
+		    int n
+	    ){
+		int i, j, k;
 
+//	    i = (*targetcell)(g,lab,ptn,level,tc_level,digraph,hint,m,n);
+		i = nauSparse.targetcell_sg(g, lab, ptn, level, tc_level, hint, n);
+		for(j = i + 1; ptn[j] > level; ++j){
+		}
+
+		tcellsize.val = j - i + 1;
+
+		tcell.clear();
+		for(k = i; k <= j; ++k){
+			tcell.addElement(lab[k]);
+		}
+
+		cellpos.val = i;
+	}
+
+	/**
+	 * shortprune(set1,set2,m) ANDs the contents of set set2 into set set1.
+	 * 
+	 * GLOBALS ACCESSED: NONE
+	 */
+	void shortprune(NSet set1, NSet set2/*, int m*/){
+		set1.intersect(set2);
+	}
+
+	/**
+	 * breakout(lab,ptn,level,tc,tv,active,m) operates on the partition at
+	 * the specified level in the partition nest (lab,ptn).  It finds the
+	 * element tv, which is in the cell C starting at index tc in lab (it had
+	 * better be) and splits C in the two cells {tv} and C\{tv}, in that order.
+	 * It also sets the set active to contain just the element tc.
+	 * 
+	 * GLOBALS ACCESSED: bit<r>
+	 */
+	public void breakout(int[] lab, int[] ptn, int level, int tc, int tv, NSet active, int m){
+		int i, prev, next;
+
+		active.clear();
+		active.addElement(tc);
+
+		i = tc;
+		prev = tv;
+
+		do{
+			next = lab[i];
+			lab[i++] = prev;
+			prev = next;
+		}while(prev != tv);
+
+		ptn[tc] = level;
+	}
+	
 	/**
 	 * expression whose long value depends only on long l and int/long i.
 	 * Anything goes, preferably non-commutative.
