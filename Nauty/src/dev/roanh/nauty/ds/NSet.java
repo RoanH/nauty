@@ -12,7 +12,9 @@ public class NSet{
 
 	//word size is irrelevant dropped as input
 	public int nextelement(int pos){
-		return set.nextSetBit(pos);
+		//nauty spec: greater than pos
+		//java spec: on or after
+		return set.nextSetBit(pos + 1);
 	}
 
 	public void addElement(int pos){

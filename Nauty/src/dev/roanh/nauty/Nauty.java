@@ -22,24 +22,21 @@ public class Nauty{
 	public static final int NAUTY_ABORTED = -11;
 	public static final int NAUTY_KILLED = -12;
 	
-	//TODO keep?
-	private volatile boolean nauty_kill_request;
-	
 	//TODO probably going to have instances of nauty
 	
-	
 	/**
-	 * We only support sparse nauty the dispatch vector is hard wired.
+	 * We only support sparse nauty the dispatch vector and invar procedure are hard wired.
 	 */
-	private final NauSparse dispatch = new NauSparse();
-	
+	private final NauSparse nauSparse = new NauSparse();
+	private final NaUtil naUtil = new NaUtil();
 	
 	/* copies of some of the options: */
 	boolean getcanon,digraph,writeautoms,domarkers,cartesian;
 	int linelength,tc_level,mininvarlevel,maxinvarlevel,invararg;
 	@Deprecated//these are all null
 	Object usernodeproc, userautomproc, userlevelproc, usercanonproc;
-	Object invarproc;//TODO type
+	@Deprecated
+	Object invarproc;//TODO type -> use nausparse.adjacencies_sg
 	//TODO outfile ignored
 	@Deprecated
 	final boolean doschreier = false;
@@ -111,7 +108,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 //	void nauty(SparseGraph g_arg, int[] lab, int[] ptn, NSet active_arg, int[] orbits_arg, OptionBlk options, StatsBlk stats_arg, NSet ws_arg, int worksize, int m_arg, int n_arg, SparseGraph canong_arg){
 	void nauty(SparseGraph g_arg, int[] lab, int[] ptn, int[] orbits_arg, OptionBlk options, StatsBlk stats_arg, NSet ws_arg, int worksize, int m_arg, int n_arg, SparseGraph canong_arg){
 		int i;
-		int numcells;
+		IntPtr numcells;
 		int retval;
 		IntPtr initstatus = new IntPtr();
 		TCNode tcp;
@@ -146,7 +143,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 			stats_arg.invarsuclevel = 0;
 
 			initstatus.val = 0;
-			dispatch.init_sg(g_arg, canong_arg, options, initstatus);
+			nauSparse.init_sg(g_arg, canong_arg, options, initstatus);
 			if(initstatus.check()){
 				stats_arg.errstatus = initstatus.val;
 			}
@@ -190,7 +187,6 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 			tc_level = options.tc_level;
 		}
 
-		invarproc = options.invarproc;
 		if(options.mininvarlevel < 0 && options.getcanon){
 			mininvarlevel = -options.mininvarlevel;
 		}else{
@@ -222,12 +218,12 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 //	        numcells = 1;
 		}else{
 			ptn[n - 1] = 0;
-			numcells = 0;
+			numcells.val = 0;
 			for(i = 0; i < n; ++i){
 				if(ptn[i] != 0){
 					ptn[i] = NAUTY_INFINITY;
 				}else{
-					++numcells;
+					++numcells.val;
 				}
 			}
 
@@ -244,7 +240,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 		canong = null;
 		initstatus.val = 0;
 
-		dispatch.init_sg(g_arg, canong_arg, options, initstatus);
+		nauSparse.init_sg(g_arg, canong_arg, options, initstatus);
 		if(initstatus.check()){
 			stats.errstatus = initstatus.val;
 			return;
@@ -291,7 +287,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 			throw new IllegalStateException("Nauty killed");
 		}else{
 			if(getcanon){
-				dispatch.updatecan_sg(g, canong, canonlab, samerows, n);
+				nauSparse.updatecan_sg(g, canong, canonlab, samerows, n);
 				for(i = 0; i < n; ++i){
 					lab[i] = canonlab[i];
 				}
@@ -319,11 +315,13 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	 *                   (*userlevelproc)(),(*tcellproc)(),shortprune()
 	 */
 	int
-	firstpathnode0(int[] lab, int[] ptn, int level, int numcells,
+	firstpathnode0(int[] lab, int[] ptn, int level, IntPtr numcells,
 	          TCNode tcnode_parent)
 	{
 	    int tv;
-	    int tv1,index,rtnlevel,tcellsize,tc,childcount,qinvar,refcode;
+	    int tv1,index,rtnlevel,tcellsize,tc,childcount;
+	    IntPtr qinvar = new IntPtr();
+	    IntPtr refcode = new IntPtr();
 	    NSet tcell;
 	    TCNode tcnode_this;
 
@@ -339,14 +337,14 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	    ++stats.numnodes;
 
 	    /* refine partition : */
-	    doref(g,lab,ptn,level,&numcells,&qinvar,workperm,
-	          active,&refcode,dispatch.refine,invarproc,
-	          mininvarlevel,maxinvarlevel,invararg,digraph,M,n);
-	    firstcode[level] = (short)refcode;
-	    if (qinvar > 0)
+	    naUtil.doref(g,lab,ptn,level,numcells,qinvar,workperm,
+	          active,refcode,nauSparse,
+	          mininvarlevel,maxinvarlevel,/*invararg,digraph,M,*/n);
+	    firstcode[level] = (short)refcode.val;
+	    if (qinvar.val > 0)
 	    {
 	        ++invapplics;
-	        if (qinvar == 2)
+	        if (qinvar.val == 2)
 	        {
 	            ++invsuccesses;
 	            if (mininvarlevel < 0){ mininvarlevel = level;}
@@ -356,7 +354,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	    }
 
 	    tc = -1;
-	    if (numcells != n)
+	    if (numcells.val != n)
 	    {
 	     /* locate new target cell, setting tc to its position in lab, tcell
 	                      to its contents, and tcellsize to its size: */
@@ -369,7 +367,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	    /* optionally call user-defined node examination procedure: */
 	    //OPTCALL(usernodeproc)(g,lab,ptn,level,numcells,tc,(int)firstcode[level],M,n);
 
-	    if (numcells == n){/* found first leaf? */
+	    if (numcells.val == n){/* found first leaf? */
 	        firstterminal(lab,level);
 	        //user level and canon proc are both not supported
 //	        OPTCALL(userlevelproc)(lab,ptn,level,orbits,stats,0,1,1,n,0,n);
@@ -383,25 +381,27 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	        return level-1;
 	    }
 
-	    if (nauty_kill_request) return NAUTY_KILLED;
+	    if(Thread.interrupted()){
+	    	throw new InterruptedException();
+	    }
 
-	    if (noncheaplevel >= level && !dispatch.cheapautom_sg(ptn,level,digraph,n)){
+	    if (noncheaplevel >= level && !nauSparse.cheapautom_sg(ptn,level,digraph,n)){
 	        noncheaplevel = level + 1;
 	        }
 
 	    /* use the elements of the target cell to produce the children: */
 	    index = 0;
-	    for (tv1 = tv = nextelement(tcell,M,-1); tv >= 0;
-	                                    tv = nextelement(tcell,M,tv))
+	    for (tv1 = tv = tcell.nextelement(-1); tv >= 0;
+	                                    tv = tcell.nextelement(tv))
 	    {
 	        if (orbits[tv] == tv)   /* ie, not equiv to previous child */
 	        {
 	            breakout(lab,ptn,level+1,tc,tv,active,M);
-	            ADDELEMENT(fixedpts,tv);
+	            fixedpts.addElement(tv);
 	            cosetindex = tv;
 	            if (tv == tv1)
 	            {
-	                rtnlevel = firstpathnode0(lab,ptn,level+1,numcells+1,
+	                rtnlevel = firstpathnode0(lab,ptn,level+1,numcells.incNew(),
 	                                         tcnode_this);
 	                childcount = 1;
 	                gca_first = level;
@@ -409,16 +409,16 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	            }
 	            else
 	            {
-	                rtnlevel = othernode0(lab,ptn,level+1,numcells+1,
+	                rtnlevel = othernode0(lab,ptn,level+1,numcells.incNew(),
 	                                     tcnode_this);
 	                ++childcount;
 	            }
-	            DELELEMENT(fixedpts,tv);
+	            fixedpts.delElement(tv);
 	            if (rtnlevel < level)
 	                return rtnlevel;
 	            if (needshortprune)
 	            {
-	                needshortprune = FALSE;
+	                needshortprune = false;
 	                shortprune(tcell,fmptr-M,M);
 	            }
 	            recover(ptn,level);
@@ -431,10 +431,9 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	    if (tcellsize == index && allsamelevel == level + 1)
 	        --allsamelevel;
 
-	    if (domarkers)
-	        writemarker(level,tv1,index,tcellsize,stats->numorbits,numcells);
-	    OPTCALL(userlevelproc)(lab,ptn,level,orbits,stats,tv1,index,tcellsize,
-	                                                    numcells,childcount,n);
+//	    if (domarkers){//fixed to false
+//	        writemarker(level,tv1,index,tcellsize,stats->numorbits,numcells);}
+//	    OPTCALL(userlevelproc)(lab,ptn,level,orbits,stats,tv1,index,tcellsize,numcells,childcount,n);
 	    return level-1;
 	}
 	
