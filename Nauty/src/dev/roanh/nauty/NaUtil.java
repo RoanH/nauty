@@ -195,6 +195,36 @@ public class NaUtil{
 		ptn[tc] = level;
 	}
 	
+
+	/*****************************************************************************
+	*                                                                            *
+	*  longprune(tcell,fix,bottom,top,m) removes zero or elements of the set     *
+	*  tcell.  It is assumed that addresses bottom through top-1 contain         *
+	*  contiguous pairs of sets (f1,m1),(f2,m2), ... .  tcell is intersected     *
+	*  with each mi such that fi is a subset of fix.                             *
+	*                                                                            *
+	*  GLOBALS ACCESSED: NONE                                                    *
+	*                                                                            *
+	*****************************************************************************/
+	
+	void
+	longprune(NSet tcell, NSet fix, NSet bottom, NSet top, int m)
+	{
+	    int i;
+	
+	    while (bottom < top)
+	    {
+	        for (i = 0; i < m; ++i)
+	            if (NOTSUBSET(fix[i],bottom[i])) break;
+	        bottom += m;
+	
+	        if (i == m){
+	        	tcell.intersect(bottom);
+	        }
+	        bottom += m;
+	    }
+	}
+	
 	/**
 	 * expression whose long value depends only on long l and int/long i.
 	 * Anything goes, preferably non-commutative.

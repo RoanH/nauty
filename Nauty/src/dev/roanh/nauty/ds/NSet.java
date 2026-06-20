@@ -33,6 +33,12 @@ public class NSet{
 		set.and(other.set);
 	}
 	
+	public boolean notSubSet(NSet other){
+		//TODO
+		#define NOTSUBSET(word1,word2) ((word1) & ~(word2))  /* test if the 1-bits
+        in setword word1 do not form a subset of those in word2  */
+	}
+	
 	//EMPTYSET
 	public void clear(){
 		set.clear();
