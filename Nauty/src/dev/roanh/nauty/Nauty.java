@@ -30,8 +30,11 @@ public class Nauty{
 	private final NauSparse nauSparse = new NauSparse();
 	private final NaUtil naUtil = new NaUtil();
 	
+	//TODO fix the copies below to final constants equal to the sparse options and clear some branches
 	/* copies of some of the options: */
-	boolean getcanon,digraph,writeautoms,domarkers,cartesian;
+	final boolean getcanon = true;
+	final boolean digraph = true;
+	boolean writeautoms,domarkers,cartesian;
 	int linelength,tc_level,mininvarlevel,maxinvarlevel,invararg;
 	@Deprecated//these are all null
 	Object usernodeproc, userautomproc, userlevelproc, usercanonproc;
@@ -448,7 +451,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	 *                   nextelement(),breakout(),othernode(),longprune()
 	 */
 	static int
-	othernode0(int[] lab, int[] ptn, int level, int numcells,
+	othernode0(int[] lab, int[] ptn, int level, IntPtr numcells,
 	      tcnode *tcnode_parent)
 	{
 	    int tv;
@@ -474,7 +477,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	    ++stats->numnodes;
 
 	    /* refine partition : */
-	    doref(g,lab,ptn,level,&numcells,&qinvar,workperm,active,
+	    doref(g,lab,ptn,level,numcells,&qinvar,workperm,active,
 	          &refcode,dispatch.refine,invarproc,mininvarlevel,maxinvarlevel,
 	          invararg,digraph,M,n);
 	    code = (short)refcode;
@@ -494,17 +497,17 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	    {
 	        if (eqlev_canon == level - 1)
 	        {
-	            if (code < canoncode[level])
-	                comp_canon = -1;
-	            else if (code > canoncode[level])
-	                comp_canon = 1;
+	            if (code < canoncode[level]){
+	                comp_canon = -1;}
+	            else if (code > canoncode[level]){
+	                comp_canon = 1;}
 	            else
 	            {
 	                comp_canon = 0;
 	                eqlev_canon = level;
 	            }
 	        }
-	        if (comp_canon > 0) canoncode[level] = code;
+	        if (comp_canon > 0) {canoncode[level] = code;}
 	    }
 
 	    tc = -1;
@@ -523,7 +526,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	        else
 	            maketargetcell(g,lab,ptn,level,tcell,&tcellsize,&tc,
 	                  tc_level,digraph,-1,dispatch.targetcell,M,n);
-	        stats->tctotal += tcellsize;
+	        stats.tctotal += tcellsize;
 	    }
 
 	    /* optionally call user-defined node examination procedure: */
@@ -540,8 +543,9 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	        shortprune(tcell,fmptr-M,M);
 	    }
 
-	    if (!(*dispatch.cheapautom)(ptn,level,digraph,n))
+	    if (!(*dispatch.cheapautom)(ptn,level,digraph,n)){
 	        noncheaplevel = level + 1;
+	    }
 
 	    /* use the elements of the target cell to produce the children: */
 	    for (tv1 = tv = nextelement(tcell,M,-1); tv >= 0;
@@ -571,11 +575,237 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	    return level-1;
 	}
 	
+	/**
+	 * Process the first leaf of the tree.
+	 * 
+	 * FUNCTIONS CALLED: NONE
+	 */
+	void firstterminal(int[] lab, int level){
+		int i;
+
+		stats.maxlevel = level;
+		gca_first = allsamelevel = eqlev_first = level;
+		firstcode[level + 1] = 077777;
+		firsttc[level + 1] = -1;
+
+		for(i = 0; i < n; ++i){
+			firstlab[i] = lab[i];
+		}
+
+		if(getcanon){
+			canonlevel = eqlev_canon = gca_canon = level;
+			comp_canon = 0;
+			samerows = 0;
+			for(i = 0; i < n; ++i){
+				canonlab[i] = lab[i];
+			}
+			for(i = 0; i <= level; ++i){
+				canoncode[i] = firstcode[i];
+			}
+			canoncode[level + 1] = 077777;
+			stats.canupdates = 1;
+		}
+	}
 	
+	/*****************************************************************************
+	*                                                                            *
+	*  Process a node other than the first leaf or its ancestors.  It is first   *
+	*  classified into one of five types and then action is taken appropriate    *
+	*  to that type.  The types are                                              *
+	*                                                                            *
+	*  0:   Nothing unusual.  This is just a node internal to the tree whose     *
+	*         children need to be generated sometime.                            *
+	*  1:   This is a leaf equivalent to the first leaf.  The mapping from       *
+	*         firstlab to lab is thus an automorphism.  After processing the     *
+	*         automorphism, we can return all the way to the closest invocation  *
+	*         of firstpathnode.                                                  *
+	*  2:   This is a leaf equivalent to the bsf leaf.  Again, we have found an  *
+	*         automorphism, but it may or may not be as useful as one from a     *
+	*         type-1 node.  Return as far up the tree as possible.               *
+	*  3:   This is a new bsf node, provably better than the previous bsf node.  *
+	*         After updating canonlab etc., treat it the same as type 4.         *
+	*  4:   This is a leaf for which we can prove that no descendant is          *
+	*         equivalent to the first or bsf leaf or better than the bsf leaf.   *
+	*         Return up the tree as far as possible, but this may only be by     *
+	*         one level.                                                         *
+	*                                                                            *
+	*  Types 2 and 3 can't occur if getcanon==FALSE.                             *
+	*  The value returned is the level in the tree to return to, which can be    *
+	*  anywhere up to the closest invocation of firstpathnode.                   *
+	*                                                                            *
+	*  FUNCTIONS CALLED:    isautom(),updatecan(),testcanlab(),fmperm(),         *
+	*                       writeperm(),(*userautomproc)(),orbjoin(),            *
+	*                       shortprune(),fmptn()                                 *
+	*                                                                            *
+	*****************************************************************************/
+
+	static int
+	processnode(int *lab, int *ptn, int level, int numcells)
+	{
+	    int i,code,save,newlevel;
+	    boolean ispruneok;
+	    int sr;
+
+	    code = 0;
+	    if (eqlev_first != level && (!getcanon || comp_canon < 0))
+	        code = 4;
+	    else if (numcells == n)
+	    {
+	        if (eqlev_first == level)
+	        {
+	            for (i = 0; i < n; ++i) workperm[firstlab[i]] = lab[i];
+
+	            if (gca_first >= noncheaplevel ||
+	                               (*dispatch.isautom)(g,workperm,digraph,M,n))
+	                code = 1;
+	        }
+	        if (code == 0)
+	        {
+	            if (getcanon)
+	            {
+	                sr = 0;
+	                if (comp_canon == 0)
+	                {
+	                    if (level < canonlevel)
+	                        comp_canon = 1;
+	                    else
+	                    {
+	                        (*dispatch.updatecan)
+	                                          (g,canong,canonlab,samerows,M,n);
+	                        samerows = n;
+	                        comp_canon
+	                            = (*dispatch.testcanlab)(g,canong,lab,&sr,M,n);
+	                    }
+	                }
+	                if (comp_canon == 0)
+	                {
+	                    for (i = 0; i < n; ++i) workperm[canonlab[i]] = lab[i];
+	                    code = 2;
+	                }
+	                else if (comp_canon > 0)
+	                    code = 3;
+	                else
+	                    code = 4;
+	            }
+	            else
+	                code = 4;
+	        }
+	    }
+
+	    if (code != 0 && level > stats->maxlevel) stats->maxlevel = level;
+
+	    switch (code)
+	    {
+	    case 0:                 /* nothing unusual noticed */
+	        return level;
+
+	    case 1:                 /* lab is equivalent to firstlab */
+	        if (fmptr == worktop) fmptr -= 2 * M;
+	        fmperm(workperm,fmptr,fmptr+M,M,n);
+	        fmptr += 2 * M;
+	        if (writeautoms)
+	            writeperm(outfile,workperm,cartesian,linelength,n);
+	        stats->numorbits = orbjoin(orbits,workperm,n);
+	        ++stats->numgenerators;
+	        OPTCALL(userautomproc)(stats->numgenerators,workperm,orbits,
+	                                    stats->numorbits,stabvertex,n);
+	        if (doschreier) addgenerator(&gp,&gens,workperm,n);
+	        return gca_first;
+
+	    case 2:                 /* lab is equivalent to canonlab */
+	        if (fmptr == worktop) fmptr -= 2 * M;
+	        fmperm(workperm,fmptr,fmptr+M,M,n);
+	        fmptr += 2 * M;
+	        save = stats->numorbits;
+	        stats->numorbits = orbjoin(orbits,workperm,n);
+	        if (stats->numorbits == save)
+	        {
+	            if (gca_canon != gca_first) needshortprune = TRUE;
+	            return gca_canon;
+	        }
+	        if (writeautoms)
+	            writeperm(outfile,workperm,cartesian,linelength,n);
+	        ++stats->numgenerators;
+	        OPTCALL(userautomproc)(stats->numgenerators,workperm,orbits,
+	                                    stats->numorbits,stabvertex,n);
+	        if (doschreier) addgenerator(&gp,&gens,workperm,n);
+	        if (orbits[cosetindex] < cosetindex)
+	            return gca_first;
+	        if (gca_canon != gca_first)
+	            needshortprune = TRUE;
+	        return gca_canon;
+
+	    case 3:                 /* lab is better than canonlab */
+	        ++stats->canupdates;
+	        for (i = 0; i < n; ++i) canonlab[i] = lab[i];
+	        canonlevel = eqlev_canon = gca_canon = level;
+	        comp_canon = 0;
+	        canoncode[level+1] = 077777;
+	        samerows = sr;
+	        if (getcanon && usercanonproc != NULL)
+	        {
+	            (*dispatch.updatecan)(g,canong,canonlab,samerows,M,n);
+	            samerows = n;
+	            if ((*usercanonproc)(g,canonlab,canong,stats->canupdates,
+	                                (int)canoncode[level],M,n))
+	                return NAUTY_ABORTED;
+	        }
+	        break;
+
+	    case 4:                /* non-automorphism terminal node */
+	        ++stats->numbadleaves;
+	        break;
+	    }  /* end of switch statement */
+
+	    /* only cases 3 and 4 get this far: */
+	    if (level != noncheaplevel)
+	    {
+	        ispruneok = TRUE;
+	        if (fmptr == worktop) fmptr -= 2 * M;
+	        fmptn(lab,ptn,noncheaplevel,fmptr,fmptr+M,M,n);
+	        fmptr += 2 * M;
+	    }
+	    else
+	        ispruneok = FALSE;
+
+	    save = (allsamelevel > eqlev_canon ? allsamelevel-1 : eqlev_canon);
+	    newlevel = (noncheaplevel <= save ? noncheaplevel-1 : save);
+
+	    if (ispruneok && newlevel != gca_first) needshortprune = TRUE;
+	    return newlevel;
+	 }
 	
-	
-	
-	
+	/**
+	 * Recover the partition nest at level 'level' and update various other
+	 * parameters.
+	 * 
+	 * FUNCTIONS CALLED: NONE
+	 */
+	void recover(int[] ptn, int level){
+		int i;
+
+		for(i = 0; i < n; ++i){
+			if(ptn[i] > level){
+				ptn[i] = NAUTY_INFINITY;
+			}
+		}
+
+		if(level < noncheaplevel){
+			noncheaplevel = level + 1;
+		}
+		if(level < eqlev_first){
+			eqlev_first = level;
+		}
+		if(getcanon){
+			if(level < gca_canon){
+				gca_canon = level;
+			}
+			if(level <= eqlev_canon){
+				eqlev_canon = level;
+				comp_canon = 0;
+			}
+		}
+	}
 	
 	public static int[] dynAllStat(){
 		//effectively just a flag, but it keeps things more consistent with nauty
