@@ -177,7 +177,7 @@ public class NaUtil{
 	 * 
 	 * GLOBALS ACCESSED: bit<r>
 	 */
-	public void breakout(int[] lab, int[] ptn, int level, int tc, int tv, NSet active, int m){
+	public void breakout(int[] lab, int[] ptn, int level, int tc, int tv, NSet active/*, int m*/){
 		int i, prev, next;
 
 		active.clear();

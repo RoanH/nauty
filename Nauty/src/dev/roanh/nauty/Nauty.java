@@ -402,7 +402,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	    {
 	        if (orbits[tv] == tv)   /* ie, not equiv to previous child */
 	        {
-	            breakout(lab,ptn,level+1,tc,tv,active,M);
+	            naUtil.breakout(lab,ptn,level+1,tc.val,tv,active);
 	            fixedpts.addElement(tv);
 	            cosetindex = tv;
 	            if (tv == tv1)
@@ -432,10 +432,11 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	        if (orbits[tv] == tv1)  /* ie, in same orbit as tv1 */
 	            ++index;
 	    }
-	    MULTIPLY(stats->grpsize1,stats->grpsize2,index);
+	    MULTIPLY(stats.grpsize1,stats.grpsize2,index);
 
-	    if (tcellsize == index && allsamelevel == level + 1)
+	    if (tcellsize.val == index && allsamelevel == level + 1){
 	        --allsamelevel;
+	    }
 
 //	    if (domarkers){//fixed to false
 //	        writemarker(level,tv1,index,tcellsize,stats->numorbits,numcells);}
@@ -453,49 +454,51 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	 *                    processnode(),cheapautom(),(*tcellproc)(),shortprune(),
 	 *                   nextelement(),breakout(),othernode(),longprune()
 	 */
-	static int
+	int
 	othernode0(int[] lab, int[] ptn, int level, IntPtr numcells,
-	      tcnode *tcnode_parent)
+	      TCNode tcnode_parent)
 	{
 	    int tv;
-	    int tv1,refcode,rtnlevel,tcellsize,tc,qinvar;
+	    int tv1,rtnlevel;
+	    IntPtr tcellsize = new IntPtr();
+	    IntPtr tc = new IntPtr();
+	    IntPtr refcode = new IntPtr();
+	    IntPtr qinvar = new IntPtr();
 	    short code;
-	    set *tcell;
-	    tcnode *tcnode_this;
+	    NSet tcell;
+	    TCNode tcnode_this;
 
-	    tcnode_this = tcnode_parent->next;
-	    if (tcnode_this == NULL)
+	    tcnode_this = tcnode_parent.next;
+	    if (tcnode_this == null)
 	    {
-	        if ((tcnode_this = (tcnode*)ALLOCS(1,sizeof(tcnode))) == NULL ||
-	            (tcnode_this->tcellptr
-	                     = (set*)ALLOCS(alloc_m,sizeof(set))) == NULL)
-	            alloc_error("tcell");
-	        tcnode_parent->next = tcnode_this;
-	        tcnode_this->next = NULL;
+	    	tcnode_this = new TCNode(alloc_n);
+	        tcnode_parent.next = tcnode_this;
+	        tcnode_this.next = null;
 	    }
-	    tcell = tcnode_this->tcellptr;
+	    tcell = tcnode_this.tcellptr;
 
-	    if (nauty_kill_request) return NAUTY_KILLED;
+	    if(Thread.interrupted()){
+	    	throw new InterruptedException();
+	    }
 
-	    ++stats->numnodes;
+	    ++stats.numnodes;
 
 	    /* refine partition : */
-	    doref(g,lab,ptn,level,numcells,&qinvar,workperm,active,
-	          &refcode,dispatch.refine,invarproc,mininvarlevel,maxinvarlevel,
-	          invararg,digraph,M,n);
-	    code = (short)refcode;
-	    if (qinvar > 0)
+//	    doref(g,lab,ptn,level,numcells,&qinvar,workperm,active,&refcode,dispatch.refine,invarproc,mininvarlevel,maxinvarlevel,invararg,digraph,M,n)
+	    naUtil.doref(g,lab,ptn,level,numcells,qinvar,workperm,active, refcode,nauSparse,mininvarlevel,maxinvarlevel,n);
+	    code = (short)refcode.val;
+	    if (qinvar.val > 0)
 	    {
 	        ++invapplics;
-	        if (qinvar == 2)
+	        if (qinvar.val == 2)
 	        {
 	            ++invsuccesses;
-	            if (level < invarsuclevel) invarsuclevel = level;
+	            if (level < invarsuclevel) {invarsuclevel = level;}
 	        }
 	    }
 
-	    if (eqlev_first == level - 1 && code == firstcode[level])
-	        eqlev_first = level;
+	    if (eqlev_first == level - 1 && code == firstcode[level]){
+	        eqlev_first = level;}
 	    if (getcanon)
 	    {
 	        if (eqlev_canon == level - 1)
@@ -513,23 +516,24 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	        if (comp_canon > 0) {canoncode[level] = code;}
 	    }
 
-	    tc = -1;
+	    tc.val = -1;
 	   /* If children will be required, find new target cell and set tc to its
 	      position in lab, tcell to its contents, and tcellsize to its size: */
 
-	    if (numcells < n && (eqlev_first == level ||
+	    if (numcells.val < n && (eqlev_first == level ||
 	                         (getcanon && comp_canon >= 0)))
 	    {
 	        if (!getcanon || comp_canon < 0)
 	        {
-	            maketargetcell(g,lab,ptn,level,tcell,&tcellsize,&tc,
-	                  tc_level,digraph,firsttc[level],dispatch.targetcell,M,n);
-	            if (tc != firsttc[level]) eqlev_first = level - 1;
+//	            maketargetcell(g,lab,ptn,level,tcell,&tcellsize,&tc,tc_level,digraph,firsttc[level],dispatch.targetcell,M,n);
+	            naUtil.maketargetcell(g,lab,ptn,level,tcell,tcellsize,tc,tc_level,firsttc[level],nauSparse,n);
+	            if (tc.val != firsttc[level]) {eqlev_first = level - 1;}
 	        }
-	        else
-	            maketargetcell(g,lab,ptn,level,tcell,&tcellsize,&tc,
-	                  tc_level,digraph,-1,dispatch.targetcell,M,n);
-	        stats.tctotal += tcellsize;
+	        else{
+//	            maketargetcell(g,lab,ptn,level,tcell,&tcellsize,&tc,tc_level,digraph,-1,dispatch.targetcell,M,n);
+	            naUtil.maketargetcell(g,lab,ptn,level,tcell,tcellsize,tc,tc_level,-1,nauSparse,n);
+	        }
+	        stats.tctotal += tcellsize.val;
 	    }
 
 	    /* optionally call user-defined node examination procedure: */
@@ -538,32 +542,31 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	    /* call processnode to classify the type of this node: */
 
 	    rtnlevel = processnode(lab,ptn,level,numcells);
-	    if (rtnlevel < level)   /* keep returning if necessary */
-	        return rtnlevel;
+	    if (rtnlevel < level){   /* keep returning if necessary */
+	        return rtnlevel;}
 	    if (needshortprune)
 	    {
-	        needshortprune = FALSE;
+	        needshortprune = false;
 	        shortprune(tcell,fmptr-M,M);
 	    }
 
-	    if (!(*dispatch.cheapautom)(ptn,level,digraph,n)){
+	    if (!nauSparse.cheapautom_sg(ptn, level, digraph, n)){
 	        noncheaplevel = level + 1;
 	    }
 
 	    /* use the elements of the target cell to produce the children: */
-	    for (tv1 = tv = nextelement(tcell,M,-1); tv >= 0;
-	                                    tv = nextelement(tcell,M,tv))
+	    for (tv1 = tv = tcell.nextelement(-1); tv >= 0; tv = tcell.nextelement(tv))
 	    {
-	        breakout(lab,ptn,level+1,tc,tv,active,M);
-	        ADDELEMENT(fixedpts,tv);
-	        rtnlevel = othernode0(lab,ptn,level+1,numcells+1,tcnode_this);
-	        DELELEMENT(fixedpts,tv);
+	        naUtil.breakout(lab,ptn,level+1,tc.val,tv,active);
+	        fixedpts.addElement(tv);
+	        rtnlevel = othernode0(lab,ptn,level+1,numcells.incNew(),tcnode_this);
+	        fixedpts.delElement(tv);
 
 	        if (rtnlevel < level) return rtnlevel;
 	    /* use stored automorphism data to prune target cell: */
 	        if (needshortprune)
 	        {
-	            needshortprune = FALSE;
+	            needshortprune = false;
 	            shortprune(tcell,fmptr-M,M);
 	        }
 	        if (tv == tv1)
@@ -641,26 +644,26 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	*                       shortprune(),fmptn()                                 *
 	*                                                                            *
 	*****************************************************************************/
-
-	static int
-	processnode(int *lab, int *ptn, int level, int numcells)
+	int
+	processnode(int[] lab, int[] ptn, int level, int numcells)
 	{
 	    int i,code,save,newlevel;
 	    boolean ispruneok;
 	    int sr;
 
 	    code = 0;
-	    if (eqlev_first != level && (!getcanon || comp_canon < 0))
-	        code = 4;
+	    if (eqlev_first != level && (!getcanon || comp_canon < 0)){
+	        code = 4;}
 	    else if (numcells == n)
 	    {
 	        if (eqlev_first == level)
 	        {
-	            for (i = 0; i < n; ++i) workperm[firstlab[i]] = lab[i];
+	            for (i = 0; i < n; ++i) {workperm[firstlab[i]] = lab[i];}
 
 	            if (gca_first >= noncheaplevel ||
-	                               (*dispatch.isautom)(g,workperm,digraph,M,n))
+	                               (*dispatch.isautom)(g,workperm,digraph,M,n)){
 	                code = 1;
+	            }
 	        }
 	        if (code == 0)
 	        {
@@ -695,7 +698,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	        }
 	    }
 
-	    if (code != 0 && level > stats->maxlevel) stats->maxlevel = level;
+	    if (code != 0 && level > stats.maxlevel) {stats.maxlevel = level;}
 
 	    switch (code)
 	    {
@@ -703,16 +706,16 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	        return level;
 
 	    case 1:                 /* lab is equivalent to firstlab */
-	        if (fmptr == worktop) fmptr -= 2 * M;
+	        if (fmptr == worktop){ fmptr -= 2 * M;}
 	        fmperm(workperm,fmptr,fmptr+M,M,n);
 	        fmptr += 2 * M;
-	        if (writeautoms)
-	            writeperm(outfile,workperm,cartesian,linelength,n);
-	        stats->numorbits = orbjoin(orbits,workperm,n);
-	        ++stats->numgenerators;
-	        OPTCALL(userautomproc)(stats->numgenerators,workperm,orbits,
-	                                    stats->numorbits,stabvertex,n);
-	        if (doschreier) addgenerator(&gp,&gens,workperm,n);
+//	        if (writeautoms)
+//	            writeperm(outfile,workperm,cartesian,linelength,n);
+	        stats.numorbits = orbjoin(orbits,workperm,n);
+	        ++stats.numgenerators;
+//	        OPTCALL(userautomproc)(stats->numgenerators,workperm,orbits,
+//	                                    stats->numorbits,stabvertex,n);
+//	        if (doschreier) addgenerator(&gp,&gens,workperm,n);
 	        return gca_first;
 
 	    case 2:                 /* lab is equivalent to canonlab */
@@ -720,7 +723,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	        fmperm(workperm,fmptr,fmptr+M,M,n);
 	        fmptr += 2 * M;
 	        save = stats->numorbits;
-	        stats->numorbits = orbjoin(orbits,workperm,n);
+	        stats.numorbits = orbjoin(orbits,workperm,n);
 	        if (stats->numorbits == save)
 	        {
 	            if (gca_canon != gca_first) needshortprune = TRUE;
@@ -728,19 +731,21 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	        }
 	        if (writeautoms)
 	            writeperm(outfile,workperm,cartesian,linelength,n);
-	        ++stats->numgenerators;
-	        OPTCALL(userautomproc)(stats->numgenerators,workperm,orbits,
-	                                    stats->numorbits,stabvertex,n);
-	        if (doschreier) addgenerator(&gp,&gens,workperm,n);
-	        if (orbits[cosetindex] < cosetindex)
+	        ++stats.numgenerators;
+//	        OPTCALL(userautomproc)(stats->numgenerators,workperm,orbits,
+//	                                    stats->numorbits,stabvertex,n);
+//	        if (doschreier) addgenerator(&gp,&gens,workperm,n);
+	        if (orbits[cosetindex] < cosetindex){
 	            return gca_first;
-	        if (gca_canon != gca_first)
-	            needshortprune = TRUE;
+	        }
+	        if (gca_canon != gca_first){
+	            needshortprune = true;
+	        }
 	        return gca_canon;
 
 	    case 3:                 /* lab is better than canonlab */
-	        ++stats->canupdates;
-	        for (i = 0; i < n; ++i) canonlab[i] = lab[i];
+	        ++stats.canupdates;
+	        for (i = 0; i < n; ++i) {canonlab[i] = lab[i];}
 	        canonlevel = eqlev_canon = gca_canon = level;
 	        comp_canon = 0;
 	        canoncode[level+1] = 077777;
@@ -749,14 +754,14 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	        {
 	            (*dispatch.updatecan)(g,canong,canonlab,samerows,M,n);
 	            samerows = n;
-	            if ((*usercanonproc)(g,canonlab,canong,stats->canupdates,
-	                                (int)canoncode[level],M,n))
-	                return NAUTY_ABORTED;
+//	            if ((*usercanonproc)(g,canonlab,canong,stats->canupdates,
+//	                                (int)canoncode[level],M,n))
+//	                return NAUTY_ABORTED;
 	        }
 	        break;
 
 	    case 4:                /* non-automorphism terminal node */
-	        ++stats->numbadleaves;
+	        ++stats.numbadleaves;
 	        break;
 	    }  /* end of switch statement */
 
@@ -768,13 +773,14 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	        fmptn(lab,ptn,noncheaplevel,fmptr,fmptr+M,M,n);
 	        fmptr += 2 * M;
 	    }
-	    else
-	        ispruneok = FALSE;
-
+	    else{
+	        ispruneok = false;
+	    }
+	        
 	    save = (allsamelevel > eqlev_canon ? allsamelevel-1 : eqlev_canon);
 	    newlevel = (noncheaplevel <= save ? noncheaplevel-1 : save);
 
-	    if (ispruneok && newlevel != gca_first) needshortprune = TRUE;
+	    if (ispruneok && newlevel != gca_first){ needshortprune = true;}
 	    return newlevel;
 	 }
 	
