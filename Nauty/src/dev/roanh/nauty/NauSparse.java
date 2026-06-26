@@ -38,9 +38,9 @@ public class NauSparse{
 	private int[] work3 = Nauty.dynAllStat();
 	private int[] work4 = Nauty.dynAllStat();
 
-	public static void sparsenauty(Nauty nauty, SparseGraph g, int[] lab, int[] ptn, int[] orbits, OptionBlk options, StatsBlk stats, SparseGraph h) throws InterruptedException{
+	public static void sparsenauty(Nauty nauty, SparseGraph g, int[] lab, int[] ptn, int[] orbits, StatsBlk stats, SparseGraph h) throws InterruptedException{
 		//TODO remove null arg?
-		nauty.nauty(g, lab, ptn, orbits, options, stats, 500, g.nv, h);
+		nauty.nauty(g, lab, ptn, orbits, new OptionBlk(), stats, 500, g.nv, h);
 	}
 
 	/**

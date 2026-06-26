@@ -25,8 +25,8 @@ public class OptionBlk{
 //	    public final boolean writemarkers = false;     /* write stats on pts fixed, etc.? */
 	    public final boolean defaultptn = false;       /* set lab,ptn,active for single cell? */
 //	    public final boolean cartesian = false;        /* use cartesian rep for writing automs? */
-	    @Deprecated
-	    public int linelength;           /* max chars/line (excl. '\n') for output */
+//	    @Deprecated
+//	    public int linelength;           /* max chars/line (excl. '\n') for output */
 	    
 	    //repeat: NULL,NULL,NULL,NULL,
 	    //these fill all not be supported

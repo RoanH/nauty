@@ -37,7 +37,8 @@ public class Nauty{
 	final boolean writeautoms = false;
 	final boolean domarkers = false;
 	final boolean cartesian = false;
-	int linelength,tc_level,mininvarlevel,maxinvarlevel,invararg;
+//	int linelength;
+	int tc_level,mininvarlevel,maxinvarlevel,invararg;
 	@Deprecated//these are all null
 	Object usernodeproc, userautomproc, userlevelproc, usercanonproc;
 	@Deprecated
@@ -108,6 +109,10 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	int alloc_n = 0;
 	
 	record PruneRecord(NSet f, NSet m){
+		
+		PruneRecord(int n){
+			this(new NSet(n), new NSet(n));
+		}
 	}
 	
 	PruneRecord[] workspace;//first and just-after-last addresses of work area to hold automorphism data, space is a first address pointer in C
@@ -188,7 +193,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 //		writeautoms = options.writeautoms;
 //		domarkers = options.writemarkers;
 //		cartesian = options.cartesian;
-		linelength = options.linelength;
+//		linelength = options.linelength;
 		if(digraph){
 			tc_level = 0;
 		}else{
@@ -274,6 +279,9 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 
 		workspace = new PruneRecord[worksize];
 		fmptr = 0;
+		for(i = 0; i < workspace.length; i++){
+			workspace[i] = new PruneRecord(n);
+		}
 
 		/* here goes: */
 		stats.errstatus = 0;
@@ -809,7 +817,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	
 	public static int[] dynAlloc1(int[] name, int sz){
 		//JVM handles memory, so just make sure we are large enough
-		if(sz > name.length){
+		if(name == null || sz > name.length){
 			name = new int[sz];
 		}
 		
