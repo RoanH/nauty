@@ -224,7 +224,49 @@ public class NautyApi{
 		}
 		
 		
-		
+//		Dreadnaut version 2.8.6 (64 bits).
+//		> As
+//		> d
+//		> c
+//		> n=4
+//		> g
+//		 0 : 1 3;
+//		 1 : 0 2;
+//		 2 : 1 3;
+//		 3 : 0 2;
+//		> x
+//		(1 3)
+//		level 2:  3 orbits; 1 fixed; index 2
+//		(0 1)(2 3)
+//		level 1:  1 orbit; 0 fixed; index 4
+//		1 orbit; grpsize=8; 2 gens; 6 nodes; maxlev=3
+//		canupdates=1; cpu time = 0.00 seconds
+//		> b
+//		 0 2 1 3
+//		  0 :  2 3;
+//		  1 :  2 3;
+//		  2 :  0 1;
+//		  3 :  0 1;
+//		> g
+//		 0 : 2 3;
+//		 1 : 2 3;
+//		 2 : 0 1;
+//		 3 : 0 1;
+//		> x
+//		(2 3)
+//		level 2:  3 orbits; 2 fixed; index 2
+//		(0 1)
+//		(0 2)(1 3)
+//		level 1:  1 orbit; 0 fixed; index 4
+//		1 orbit; grpsize=8; 3 gens; 8 nodes; maxlev=3
+//		canupdates=1; cpu time = 0.00 seconds
+//		> b
+//		 0 1 2 3
+//		  0 :  2 3;
+//		  1 :  2 3;
+//		  2 :  0 1;
+//		  3 :  0 1;
+//		>
 		
 	}
 	
