@@ -7,6 +7,113 @@ import dev.roanh.nauty.struct.SparseGraph;
 
 public class NaUtil{
 	private int[] workperm = Nauty.dynAllStat();
+	
+	/**
+	 * orbits represents a partition of {0,1,...,n-1}, by orbits[i] = the
+	 * smallest element in the same cell as i.  map[] is any array with values
+	 * in {0,1,...,n-1}.  orbjoin(orbits,map,n) joins the cells of orbits[]
+	 * together to the minimum extent such that for each i, i and map[i] are in
+	 * the same cell.  The function value returned is the new number of cells.
+	 * 
+	 * GLOBALS ACCESSED: NONE
+	 */
+	int orbjoin(int[] orbits, int[] map, int n){
+		int i, j1, j2;
+
+		for(i = 0; i < n; ++i){
+			if(map[i] != i){
+				j1 = orbits[i];
+				while(orbits[j1] != j1){
+					j1 = orbits[j1];
+				}
+				j2 = orbits[map[i]];
+				while(orbits[j2] != j2){
+					j2 = orbits[j2];
+				}
+
+				if(j1 < j2){
+					orbits[j2] = j1;
+				}else if(j1 > j2){
+					orbits[j1] = j2;
+				}
+			}
+		}
+
+		j1 = 0;
+		for(i = 0; i < n; ++i){
+			if((orbits[i] = orbits[orbits[i]]) == i){
+				++j1;
+			}
+		}
+
+		return j1;
+	}
+	
+	/**
+	 * fmperm(perm,fix,mcr,m,n) uses perm to construct fix and mcr.  fix
+	 * contains those points are fixed by perm, while mcr contains the set of
+	 * those points which are least in their orbits.
+	 * 
+	 * GLOBALS ACCESSED: bit<r>
+	 */
+	void fmperm(int[] perm, NSet fix, NSet mcr, /*int m,*/ int n){
+		int i, k, l;
+
+		workperm = Nauty.dynAlloc1(workperm, n);
+
+		fix.clear();
+		mcr.clear();
+
+		for(i = n; --i >= 0;){
+			workperm[i] = 0;
+		}
+
+		for(i = 0; i < n; ++i){
+			if(perm[i] == i){
+				fix.addElement(i);
+				mcr.addElement(i);
+			}else if(workperm[i] == 0){
+				l = i;
+				do{
+					k = l;
+					l = perm[l];
+					workperm[k] = 1;
+				}while(l != i);
+
+				mcr.addElement(i);
+			}
+		}
+	}
+	
+	/**
+	 * fmptn(lab,ptn,level,fix,mcr,m,n) uses the partition at the specified
+	 * level in the partition nest (lab,ptn) to make sets fix and mcr.  fix
+	 * represents the points in trivial cells of the partition, while mcr
+	 * represents those points which are least in their cells.
+	 * 
+	 * GLOBALS ACCESSED: bit<r>
+	 */
+	void fmptn(int[] lab, int[] ptn, int level, NSet fix, NSet mcr, /*int m,*/ int n){
+		int i, lmin;
+
+		fix.clear();
+		mcr.clear();
+
+		for(i = 0; i < n; ++i){
+			if(ptn[i] <= level){
+				fix.addElement(lab[i]);
+				mcr.addElement(lab[i]);
+			}else{
+				lmin = lab[i];
+				do{
+					if(lab[++i] < lmin){
+						lmin = lab[i];
+					}
+				}while(ptn[i] > level);
+				mcr.addElement(lmin);
+			}
+		}
+	}
 
 	/**
 	 * doref(g,lab,ptn,level,numcells,qinvar,invar,active,code,refproc,
