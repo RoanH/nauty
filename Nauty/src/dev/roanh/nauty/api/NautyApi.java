@@ -21,10 +21,23 @@ public class NautyApi{
 		int[] orbits = new int[graph.nv];
 		
 		
-		NauSparse.sparsenauty(nauty, graph, labels, ptn, orbits, new StatsBlk(), new SparseGraph());
+		SparseGraph canon = new SparseGraph();
+		StatsBlk stats = new StatsBlk();
+		NauSparse.sparsenauty(nauty, graph, labels, ptn, orbits, stats, canon);
 		
 		
+		System.out.println(stats);
 		System.out.println(Arrays.toString(labels));
+		for(int i = 0; i < canon.nv; i++){
+			System.out.print(i + " : " );
+			int[] adj = new int[canon.d[i]];
+			System.arraycopy(canon.e, canon.v[i], adj, 0, adj.length);
+			Arrays.sort(adj);
+			for(int e : adj){
+				System.out.print(e + " ");
+			}
+			System.out.println();
+		}
 		
 		
 		//TODO cannonical is not sorted, could return relab directly
@@ -41,28 +54,174 @@ public class NautyApi{
 //		| \     |
 //		3 - 4 - 5
 		
-		SparseGraph g = new SparseGraph();
-		SparseGraph.sgAlloc(g, 6, 14);
-		g.nv = 6;
-		g.nde = 14;
-		g.v = new int[]{0,3,5,7,9,12};
-		g.d = new int[]{3,2,2,2,3,2};
-		g.e = new int[]{
-			1,3,4,
-			 0,2,
-			 1,5,
-			 0,4,
-			 0,3,5,
-			 2,4
-		};
+//		SparseGraph g = new SparseGraph();
+//		SparseGraph.sgAlloc(g, 6, 14);
+//		g.nv = 6;
+//		g.nde = 14;
+//		g.d = new int[]{3,2,2,2,3,2};
+//		g.v = new int[]{0,3,5,7,9,12};
+//		g.e = new int[]{
+//			1,3,4,
+//			 0,2,
+//			 1,5,
+//			 0,4,
+//			 0,3,5,
+//			 2,4
+//		};
+//
+//		int[] lab = {0,1,2,3,4,5};
+//		int[] ptn = {1,1,1,1,1,1};
 		
-		int[] lab = {0,1,2,3,4,5};
-			int[] ptn = {1,1,1,1,1,0};
 		
 		
-		nauty.computeCanonicalLabelling(g, lab, ptn);
+//		{
+//			SparseGraph g = new SparseGraph();
+//			g.nv = 3;
+//			g.nde = 2;
+//			g.d = new int[]{0, 1, 1};
+//			g.v = new int[]{0, 0, 1};
+//			g.e = new int[]{
+//				0,
+//				0
+//			};
+//
+//			int[] lab = new int[]{0, 1, 2};
+//			int[] ptn = new int[]{1, 1, 1};
+//
+//			nauty.computeCanonicalLabelling(g, lab, ptn);
+//		}
+//
+//		{
+//			SparseGraph g = new SparseGraph();
+//			SparseGraph.sgAlloc(g, 3, 2);
+//			g.nv = 3;
+//			g.nde = 2;
+//			g.d = new int[]{1, 0, 1};
+//			g.v = new int[]{0, 1, 1};
+//			g.e = new int[]{
+//				1,
+//				1
+//			};
+//
+//			int[] lab = {0,1,2};
+//			int[] ptn = {1,1,1};
+//
+//
+//			nauty.computeCanonicalLabelling(g, lab, ptn);
+//		}
+//
+//		{
+//			SparseGraph g = new SparseGraph();
+//			SparseGraph.sgAlloc(g, 3, 2);
+//			g.nv = 3;
+//			g.nde = 2;
+//			g.d = new int[]{1, 1, 0};
+//			g.v = new int[]{0, 1, 2};
+//			g.e = new int[]{
+//				2,
+//				2
+//			};
+//
+//			int[] lab = {0,1,2};
+//			int[] ptn = {1,1,1};
+//
+//
+//			nauty.computeCanonicalLabelling(g, lab, ptn);
+//		}
 		
-		System.out.println(Arrays.toString(lab));
+		//TEST 1
+//		{
+//			//0 -- 1 -- 2 -- 3
+//			SparseGraph g = new SparseGraph();
+//			g.nv = 4;
+//			g.nde = 6;
+//
+//			g.d = new int[]{1,2,2,1};
+//			g.v = new int[]{0,1,3,5};
+//			g.e = new int[]{
+//			    1,
+//			    0,2,
+//			    1,3,
+//			    2
+//			};
+//
+//			int[] lab = {0,1,2,3};
+//			int[] ptn = {1,1,1,1};
+//
+//			nauty.computeCanonicalLabelling(g, lab, ptn);
+//		}
+//
+//		{
+//			//2 -- 0 -- 3 -- 1
+//			SparseGraph g = new SparseGraph();
+//			g.nv = 4;
+//			g.nde = 6;
+//
+//			g.d = new int[]{2,1,1,2};
+//			g.v = new int[]{0,2,3,4};
+//			g.e = new int[]{
+//			    2,3,
+//			    3,
+//			    0,
+//			    0,1
+//			};
+//
+//			int[] lab = {0,1,2,3};
+//			int[] ptn = {1,1,1,1};
+//
+//			nauty.computeCanonicalLabelling(g, lab, ptn);
+//		}
+		
+		//TEST 2
+		{
+//			0
+//			| \
+//			3  1
+//			 \ |
+//			  2
+			SparseGraph g = new SparseGraph();
+			g.nv = 4;
+			g.nde = 8;
+
+			g.d = new int[]{2,2,2,2};
+			g.v = new int[]{0,2,4,6};
+			g.e = new int[]{
+			    1,3,
+			    0,2,
+			    1,3,
+			    0,2
+			};
+			
+			int[] lab = {0,1,2,3};
+			int[] ptn = {1,1,1,1};
+			
+			nauty.computeCanonicalLabelling(g, lab, ptn);
+		}
+		
+		{
+//			0
+//			| \
+//			2  3
+//			 \ |
+//			  1
+			SparseGraph g = new SparseGraph();
+			g.nv = 4;
+			g.nde = 8;
+
+			g.d = new int[]{2,2,2,2};
+			g.v = new int[]{0,2,4,6};
+			g.e = new int[]{
+			    2,3,
+			    2,3,
+			    0,1,
+			    0,1
+			};
+			
+			int[] lab = {0,1,2,3};
+			int[] ptn = {1,1,1,1};
+			
+			nauty.computeCanonicalLabelling(g, lab, ptn);
+		}
 		
 		
 		

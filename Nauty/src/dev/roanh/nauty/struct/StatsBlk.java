@@ -54,4 +54,9 @@ public class StatsBlk{
 	 * Least level where invarproc worked.
 	 */
 	public int invarsuclevel;
+	
+	@Override
+	public String toString(){
+		return "StatsBlk[grpsize1=" + grpsize1 + ", grpsize2=" + grpsize2 + ", numorbits=" + numorbits + ", numgenerators=" + numgenerators + ", errstatus=" + errstatus + ", numnodes=" + numnodes + ", numbadleaves=" + numbadleaves + ", maxlevel=" + maxlevel + ", tctotal=" + tctotal + ", canupdates=" + canupdates + ", invapplics=" + invapplics + ", invsuccesses=" + invsuccesses + ", invarsuclevel=" + invarsuclevel + "]";
+	}
 }
