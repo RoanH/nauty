@@ -34,7 +34,9 @@ public class Nauty{
 	/* copies of some of the options: */
 	final boolean getcanon = true;
 	final boolean digraph = true;
-	boolean writeautoms,domarkers,cartesian;
+	final boolean writeautoms = false;
+	final boolean domarkers = false;
+	final boolean cartesian = false;
 	int linelength,tc_level,mininvarlevel,maxinvarlevel,invararg;
 	@Deprecated//these are all null
 	Object usernodeproc, userautomproc, userlevelproc, usercanonproc;
@@ -45,8 +47,8 @@ public class Nauty{
 	final boolean doschreier = false;
 	
 	/* local versions of some of the arguments: */
-	@Deprecated
-	int m;
+//	@Deprecated
+//	int m;
 	int n;
 	SparseGraph g,canong;
 	int[] orbits;
@@ -101,8 +103,8 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	   tcnodes and tcells are kept between calls to nauty, except that
 	   they are freed and reallocated if m gets bigger than alloc_m.  */
 	TCNode tcnode0 = new TCNode();
-	@Deprecated
-	int alloc_m = 0;
+//	@Deprecated
+//	int alloc_m = 0;
 	int alloc_n = 0;
 	
 	record PruneRecord(NSet f, NSet m){
@@ -114,7 +116,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	
 	//TODO call with worksize = 500 instead of 2*500*m
 //	void nauty(SparseGraph g_arg, int[] lab, int[] ptn, NSet active_arg, int[] orbits_arg, OptionBlk options, StatsBlk stats_arg, NSet ws_arg, int worksize, int m_arg, int n_arg, SparseGraph canong_arg){
-	void nauty(SparseGraph g_arg, int[] lab, int[] ptn, int[] orbits_arg, OptionBlk options, StatsBlk stats_arg, /*NSet ws_arg,*/ int worksize, int m_arg, int n_arg, SparseGraph canong_arg) throws InterruptedException{
+	void nauty(SparseGraph g_arg, int[] lab, int[] ptn, int[] orbits_arg, OptionBlk options, StatsBlk stats_arg, /*NSet ws_arg,*/ int worksize, /*int m_arg,*/ int n_arg, SparseGraph canong_arg) throws InterruptedException{
 		int i;
 		final IntPtr numcells = new IntPtr();
 		int retval;
@@ -127,10 +129,10 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 
 		/* check for excessive sizes: */
 
-		if(m_arg > NAUTY_INFINITY / WORDSIZE + 1){
-			throw new IllegalArgumentException("nauty: need m <= %d, but m=%d".formatted(NAUTY_INFINITY / WORDSIZE + 1, m_arg));
-		}
-		if(n_arg > NAUTY_INFINITY - 2 || n_arg > WORDSIZE * m_arg){
+//		if(m_arg > NAUTY_INFINITY / WORDSIZE + 1){
+//			throw new IllegalArgumentException("nauty: need m <= %d, but m=%d".formatted(NAUTY_INFINITY / WORDSIZE + 1, m_arg));
+//		}
+		if(n_arg > NAUTY_INFINITY - 2 /*|| n_arg > WORDSIZE * m_arg*/){
 			throw new IllegalArgumentException("nauty: need n <= min(%d,%d*m), but n=%d".formatted(NAUTY_INFINITY - 2, WORDSIZE, n_arg));
 		}
 
@@ -145,7 +147,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 			stats_arg.numbadleaves = 0;
 			stats_arg.maxlevel = 1;
 			stats_arg.tctotal = 0;
-			stats_arg.canupdates = options.getcanon ? 1 : 0;
+			stats_arg.canupdates = getcanon ? 1 : 0;
 			stats_arg.invapplics = 0;
 			stats_arg.invsuccesses = 0;
 			stats_arg.invarsuclevel = 0;
@@ -160,7 +162,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 		}
 
 		/* take copies of some args, and options: */
-		m = m_arg;
+//		m = m_arg;
 		n = n_arg;
 
 		defltwork = new NSet(2 * n);
@@ -172,9 +174,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 		firstcode = dynAlloc1(firstcode, n + 2);
 		canoncode = dynAlloc1(canoncode, n + 2);
 		firsttc = dynAlloc1(firsttc, n + 2);
-		if(m > alloc_m){
-			tcp = tcnode0.next;
-			alloc_m = m;
+		if(n > alloc_n){
 			alloc_n = n;
 			tcnode0.next = null;
 		}
@@ -185,9 +185,9 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 
 //		getcanon = options.getcanon;
 //		digraph = options.digraph;
-		writeautoms = options.writeautoms;
-		domarkers = options.writemarkers;
-		cartesian = options.cartesian;
+//		writeautoms = options.writeautoms;
+//		domarkers = options.writemarkers;
+//		cartesian = options.cartesian;
 		linelength = options.linelength;
 		if(digraph){
 			tc_level = 0;
@@ -195,12 +195,12 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 			tc_level = options.tc_level;
 		}
 
-		if(options.mininvarlevel < 0 && options.getcanon){
+		if(options.mininvarlevel < 0 && getcanon){
 			mininvarlevel = -options.mininvarlevel;
 		}else{
 			mininvarlevel = options.mininvarlevel;
 		}
-		if(options.maxinvarlevel < 0 && options.getcanon){
+		if(options.maxinvarlevel < 0 && getcanon){
 			maxinvarlevel = -options.maxinvarlevel;
 		}else{
 			maxinvarlevel = options.maxinvarlevel;

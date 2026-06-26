@@ -19,12 +19,12 @@ public class OptionBlk{
 	
 	//repeat: 0(true),TRUE,FALSE,FALSE,TRUE(false),FALSE,CONSOLWIDTH
 	
-	    public final boolean getcanon = true;             /* make canong and canonlab? */
-	    public final boolean digraph = true;          /* multiple edges or loops? */
-	    public final boolean writeautoms = false;      /* write automorphisms? */
-	    public final boolean writemarkers = false;     /* write stats on pts fixed, etc.? */
+//	    public final boolean getcanon = true;             /* make canong and canonlab? */
+//	    public final boolean digraph = true;          /* multiple edges or loops? */
+//	    public final boolean writeautoms = false;      /* write automorphisms? */
+//	    public final boolean writemarkers = false;     /* write stats on pts fixed, etc.? */
 	    public final boolean defaultptn = false;       /* set lab,ptn,active for single cell? */
-	    public final boolean cartesian = false;        /* use cartesian rep for writing automs? */
+//	    public final boolean cartesian = false;        /* use cartesian rep for writing automs? */
 	    @Deprecated
 	    public int linelength;           /* max chars/line (excl. '\n') for output */
 	    
@@ -45,8 +45,8 @@ public class OptionBlk{
 //	         (graph*,int*,int*,int,int,int,int,int,int);
 //	    int  (*usercanonproc)     /* procedure called for better labellings */
 //	         (graph*,int*,graph*,unsigned long,int,int,int);
-	    void (*invarproc)         /* procedure to compute vertex-invariant */
-	         (graph*,int*,int*,int,int,int,int*,int,boolean,int,int);
+//	    void (*invarproc)         /* procedure to compute vertex-invariant */
+//	         (graph*,int*,int*,int,int,int,int*,int,boolean,int,int);
 	    
 	    //repeat: 100,0,999,0,&dispatch_sparse,FALSE,NULL}
 	    

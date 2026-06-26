@@ -38,9 +38,9 @@ public class NauSparse{
 	private int[] work3 = Nauty.dynAllStat();
 	private int[] work4 = Nauty.dynAllStat();
 
-	public static void sparsenauty(SparseGraph g, int[] lab, int[] ptn, int[] orbits, OptionBlk options, StatsBlk stats, SparseGraph h){
-
-		//TODO nauty probably extend Nauty for that
+	public static void sparsenauty(Nauty nauty, SparseGraph g, int[] lab, int[] ptn, int[] orbits, OptionBlk options, StatsBlk stats, SparseGraph h) throws InterruptedException{
+		//TODO remove null arg?
+		nauty.nauty(g, lab, ptn, orbits, options, stats, 500, g.nv, h);
 	}
 
 	/**
@@ -209,7 +209,7 @@ public class NauSparse{
 		SparseGraph sg;
 		SparseGraph sh;
 
-		if(options.getcanon){
+		if(/*options.getcanon*/true){
 			sg = gin;
 			sh = hin;
 			SparseGraph.sgAlloc(sh, sg.nv, sg.nde);
