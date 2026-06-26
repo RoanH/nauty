@@ -1,5 +1,6 @@
 package dev.roanh.nauty;
 
+import dev.roanh.nauty.Nauty.PruneRecord;
 import dev.roanh.nauty.ds.NSet;
 import dev.roanh.nauty.ptr.IntPtr;
 import dev.roanh.nauty.struct.SparseGraph;
@@ -164,7 +165,7 @@ public class NaUtil{
 	 * 
 	 * GLOBALS ACCESSED: NONE
 	 */
-	void shortprune(NSet set1, NSet set2/*, int m*/){
+	static void shortprune(NSet set1, NSet set2/*, int m*/){
 		set1.intersect(set2);
 	}
 
@@ -196,33 +197,22 @@ public class NaUtil{
 	}
 	
 
-	/*****************************************************************************
-	*                                                                            *
-	*  longprune(tcell,fix,bottom,top,m) removes zero or elements of the set     *
-	*  tcell.  It is assumed that addresses bottom through top-1 contain         *
-	*  contiguous pairs of sets (f1,m1),(f2,m2), ... .  tcell is intersected     *
-	*  with each mi such that fi is a subset of fix.                             *
-	*                                                                            *
-	*  GLOBALS ACCESSED: NONE                                                    *
-	*                                                                            *
-	*****************************************************************************/
-	
-	void
-	longprune(NSet tcell, NSet fix, NSet bottom, NSet top, int m)
-	{
-	    int i;
-	
-	    while (bottom < top)
-	    {
-	        for (i = 0; i < m; ++i)
-	            if (NOTSUBSET(fix[i],bottom[i])) break;
-	        bottom += m;
-	
-	        if (i == m){
-	        	tcell.intersect(bottom);
-	        }
-	        bottom += m;
-	    }
+	/**
+	 * longprune(tcell,fix,bottom,top,m) removes zero or elements of the set
+	 * tcell.  It is assumed that addresses bottom through top-1 contain
+	 * contiguous pairs of sets (f1,m1),(f2,m2), ... .  tcell is intersected
+	 * with each mi such that fi is a subset of fix.
+	 * 
+	 * GLOBALS ACCESSED: NONE
+	 */
+	//longprune(set *tcell, set *fix, set *bottom, set *top, int m) | workspace = bottom
+	static void longprune(NSet tcell, NSet fix, PruneRecord[] workspace, int top){
+		for(int i = 0; i < top; i++){
+	        PruneRecord record = workspace[i];
+			if(!fix.notSubSet(record.f())){
+				tcell.intersect(record.m());
+			}
+		}
 	}
 	
 	/**

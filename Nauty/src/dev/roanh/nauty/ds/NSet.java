@@ -3,6 +3,7 @@ package dev.roanh.nauty.ds;
 import java.util.BitSet;
 
 //nauty set
+//TODO if this becomes a hotspot a local implementation of bitset might be more performant
 public class NSet{
 	private final BitSet set;
 	
@@ -34,9 +35,10 @@ public class NSet{
 	}
 	
 	public boolean notSubSet(NSet other){
-		//TODO
-		#define NOTSUBSET(word1,word2) ((word1) & ~(word2))  /* test if the 1-bits
-        in setword word1 do not form a subset of those in word2  */
+		//the clone might be a performance issue
+		BitSet copy = (BitSet)set.clone();
+		copy.andNot(other.set);
+		return copy.isEmpty();
 	}
 	
 	//EMPTYSET
