@@ -39,10 +39,10 @@ public class Nauty{
 	final boolean cartesian = false;
 //	int linelength;
 	int tc_level,mininvarlevel,maxinvarlevel,invararg;
-	@Deprecated//these are all null
-	Object usernodeproc, userautomproc, userlevelproc, usercanonproc;
-	@Deprecated
-	Object invarproc;//TODO type -> use nausparse.adjacencies_sg
+//	@Deprecated//these are all null
+//	Object usernodeproc, userautomproc, userlevelproc, usercanonproc;
+//	@Deprecated
+//	Object invarproc;//TODO type -> use nausparse.adjacencies_sg
 	//TODO outfile ignored
 	@Deprecated
 	final boolean doschreier = false;
@@ -220,7 +220,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 
 		/* initialize everything: */
 
-		if(options.defaultptn){//TODO fixed to false
+		if(false){//TODO fixed to false
 //	        for (i = 0; i < n; ++i){   /* give all verts same colour */
 //	            lab[i] = i;
 //	            ptn[i] = NAUTY_INFINITY;
@@ -368,26 +368,13 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 		if(numcells.val != n){
 			/* locate new target cell, setting tc to its position in lab, tcell
 			              to its contents, and tcellsize to its size: */
-//	        maketargetcell(g,lab,ptn,level,tcell,&tcellsize,&tc,tc_level,digraph,-1,dispatch.targetcell,M,n);
 			naUtil.maketargetcell(g, lab, ptn, level, tcell, tcellsize, tc, tc_level, -1, nauSparse, n);
 			stats.tctotal += tcellsize.val;
 		}
 		firsttc[level] = tc.val;
 
-		/* optionally call user-defined node examination procedure: */
-		//OPTCALL(usernodeproc)(g,lab,ptn,level,numcells,tc,(int)firstcode[level],M,n);
-
 		if(numcells.val == n){/* found first leaf? */
 			firstterminal(lab, level);
-			//user level and canon proc are both not supported
-//	        OPTCALL(userlevelproc)(lab,ptn,level,orbits,stats,0,1,1,n,0,n);
-//	        if (getcanon && usercanonproc != NULL)
-//	        {
-//	            (*dispatch.updatecan)(g,canong,canonlab,samerows,M,n);
-//	            samerows = n;
-//	            if ((*usercanonproc)(g,canonlab,canong,stats->canupdates,(int)canoncode[level],M,n))
-//	                return NAUTY_ABORTED;
-//	        }
 			return level - 1;
 		}
 
@@ -420,7 +407,6 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 					return rtnlevel;
 				if(needshortprune){
 					needshortprune = false;
-//	                shortprune(tcell,fmptr-M,M);
 					NaUtil.shortprune(tcell, workspace[fmptr - 1].m());
 				}
 				recover(ptn, level);
@@ -434,9 +420,6 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 			--allsamelevel;
 		}
 
-//	    if (domarkers){//fixed to false
-//	        writemarker(level,tv1,index,tcellsize,stats->numorbits,numcells);}
-//	    OPTCALL(userlevelproc)(lab,ptn,level,orbits,stats,tv1,index,tcellsize,numcells,childcount,n);
 		return level - 1;
 	}
 	
@@ -476,7 +459,6 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 		++stats.numnodes;
 
 		/* refine partition : */
-//	    doref(g,lab,ptn,level,numcells,&qinvar,workperm,active,&refcode,dispatch.refine,invarproc,mininvarlevel,maxinvarlevel,invararg,digraph,M,n)
 		naUtil.doref(g, lab, ptn, level, numcells, qinvar, workperm, active, refcode, nauSparse, mininvarlevel, maxinvarlevel, n);
 		code = (short)refcode.val;
 		if(qinvar.val > 0){
@@ -514,20 +496,15 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 
 		if(numcells.val < n && (eqlev_first == level || (getcanon && comp_canon >= 0))){
 			if(!getcanon || comp_canon < 0){
-//	            maketargetcell(g,lab,ptn,level,tcell,&tcellsize,&tc,tc_level,digraph,firsttc[level],dispatch.targetcell,M,n);
 				naUtil.maketargetcell(g, lab, ptn, level, tcell, tcellsize, tc, tc_level, firsttc[level], nauSparse, n);
 				if(tc.val != firsttc[level]){
 					eqlev_first = level - 1;
 				}
 			}else{
-//	            maketargetcell(g,lab,ptn,level,tcell,&tcellsize,&tc,tc_level,digraph,-1,dispatch.targetcell,M,n);
 				naUtil.maketargetcell(g, lab, ptn, level, tcell, tcellsize, tc, tc_level, -1, nauSparse, n);
 			}
 			stats.tctotal += tcellsize.val;
 		}
-
-		/* optionally call user-defined node examination procedure: */
-		//OPTCALL(usernodeproc)(g,lab,ptn,level,numcells,tc,(int)code,M,n);
 
 		/* call processnode to classify the type of this node: */
 
@@ -537,7 +514,6 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 		}
 		if(needshortprune){
 			needshortprune = false;
-//            shortprune(tcell,fmptr-M,M);
 			NaUtil.shortprune(tcell, workspace[fmptr - 1].m());
 		}
 
@@ -558,13 +534,10 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 			/* use stored automorphism data to prune target cell: */
 			if(needshortprune){
 				needshortprune = false;
-//                shortprune(tcell,fmptr-M,M);
 				NaUtil.shortprune(tcell, workspace[fmptr - 1].m());
 			}
 			if(tv == tv1){
-//	            longprune(tcell,fixedpts,workspace,fmptr,M);
 				NaUtil.longprune(tcell, fixedpts, workspace, fmptr);
-				//if (doschreier) pruneset(fixedpts,gp,&gens,tcell,M,n);
 			}
 
 			recover(ptn, level);
@@ -662,7 +635,6 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 							nauSparse.updatecan_sg(g, canong, canonlab, samerows, n);
 							samerows = n;
 							comp_canon = nauSparse.testcanlab_sg(g, canong, lab, sr, n);
-							//= (*dispatch.testcanlab)(g,canong,lab,&sr,M,n);
 						}
 					}
 					if(comp_canon == 0){
@@ -695,13 +667,8 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 			}
 			naUtil.fmperm(workperm, workspace[fmptr].f(), workspace[fmptr].m(), n);
 			fmptr++;
-//	        if (writeautoms)
-//	            writeperm(outfile,workperm,cartesian,linelength,n);
 			stats.numorbits = naUtil.orbjoin(orbits, workperm, n);
 			++stats.numgenerators;
-//	        OPTCALL(userautomproc)(stats->numgenerators,workperm,orbits,
-//	                                    stats->numorbits,stabvertex,n);
-//	        if (doschreier) addgenerator(&gp,&gens,workperm,n);
 			return gca_first;
 
 		case 2: /* lab is equivalent to canonlab */
@@ -718,12 +685,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 				}
 				return gca_canon;
 			}
-//	        if (writeautoms)
-//	            writeperm(outfile,workperm,cartesian,linelength,n);
 			++stats.numgenerators;
-//	        OPTCALL(userautomproc)(stats->numgenerators,workperm,orbits,
-//	                                    stats->numorbits,stabvertex,n);
-//	        if (doschreier) addgenerator(&gp,&gens,workperm,n);
 			if(orbits[cosetindex] < cosetindex){
 				return gca_first;
 			}
@@ -741,14 +703,6 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 			comp_canon = 0;
 			canoncode[level + 1] = 077777;
 			samerows = sr.val;
-//	        if (getcanon && usercanonproc != NULL)//user canon proc not supported
-//	        {
-//	            (*dispatch.updatecan)(g,canong,canonlab,samerows,M,n);
-//	            samerows = n;
-//	            if ((*usercanonproc)(g,canonlab,canong,stats->canupdates,
-//	                                (int)canoncode[level],M,n))
-//	                return NAUTY_ABORTED;
-//	        }
 			break;
 
 		case 4: /* non-automorphism terminal node */
@@ -763,7 +717,6 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 				fmptr--;
 			}
 			naUtil.fmptn(lab, ptn, noncheaplevel, workspace[fmptr].f(), workspace[fmptr].m(), n);
-//	        fmptn(lab,ptn,noncheaplevel,fmptr,fmptr+M,M,n);
 			fmptr++;
 		}else{
 			ispruneok = false;

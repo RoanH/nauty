@@ -45,6 +45,15 @@ public class SparseGraph{
 		return e.length;
 	}
 	
+	public SparseGraph(){
+	}
+	
+	public SparseGraph(int vertices, int edges){
+		sgAlloc(this, vertices, edges);
+		nv = vertices;
+		nde = edges;
+	}
+	
 	//note weights (w) are not implemented so ignore anything that uses it
 	
 	public static void sgAlloc(SparseGraph sg, int nlen, int ndelen){

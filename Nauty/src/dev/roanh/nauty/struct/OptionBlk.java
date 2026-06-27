@@ -23,7 +23,7 @@ public class OptionBlk{
 //	    public final boolean digraph = true;          /* multiple edges or loops? */
 //	    public final boolean writeautoms = false;      /* write automorphisms? */
 //	    public final boolean writemarkers = false;     /* write stats on pts fixed, etc.? */
-	    public final boolean defaultptn = false;       /* set lab,ptn,active for single cell? */
+//	    public final boolean defaultptn = false;       /* set lab,ptn,active for single cell? */
 //	    public final boolean cartesian = false;        /* use cartesian rep for writing automs? */
 //	    @Deprecated
 //	    public int linelength;           /* max chars/line (excl. '\n') for output */
@@ -55,6 +55,6 @@ public class OptionBlk{
 	    public final int maxinvarlevel = 999;        /* max level for invariant computation */
 	    public final int invararg = 0;             /* value passed to (*invarproc)() */
 	   // obsolete dispatchvec *dispatch;    /* vector of object-specific routines */
-	    public final boolean schreier = false;         /* use random schreier method */
+//	    public final boolean schreier = false;         /* use random schreier method */
 	    //void *extra_options;      /* arbitrary extra options */
 }

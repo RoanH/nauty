@@ -14,6 +14,14 @@ import dev.roanh.nauty.struct.StatsBlk;
 public class NautyApi{
 	private final Nauty nauty = new Nauty();
 	
+	//relab = labels
+	public void computeCanonicalLabelling2(SparseGraph graph, int[] labels, int[] ptn) throws InterruptedException{
+		int[] orbits = new int[graph.nv];
+		SparseGraph canon = new SparseGraph();
+		StatsBlk stats = new StatsBlk();
+		NauSparse.sparsenauty(nauty, graph, labels, ptn, orbits, stats, canon);
+	}
+	
 	public void computeCanonicalLabelling(SparseGraph graph, int[] labels, int[] ptn) throws InterruptedException{
 		
 		
