@@ -1,5 +1,7 @@
 package dev.roanh.nauty.struct;
 
+import java.util.Arrays;
+
 import dev.roanh.nauty.Nauty;
 
 public class SparseGraph{
@@ -24,27 +26,6 @@ public class SparseGraph{
 	 */
 	public int[] e;
 	
-	/**
-	 * Size of v.
-	 */
-	public int vlen(){
-		return v.length;
-	}
-
-	/**
-	 * Size of d.
-	 */
-	public int dlen(){
-		return d.length;
-	}
-
-	/**
-	 * Size of e.
-	 */
-	public int elen(){
-		return e.length;
-	}
-	
 	public SparseGraph(){
 	}
 	
@@ -54,7 +35,12 @@ public class SparseGraph{
 		nde = edges;
 	}
 	
-	//note weights (w) are not implemented so ignore anything that uses it
+	public void sort(){
+		for(int i = 0; i < nv; i++){
+			int from = v[i];
+			Arrays.sort(e, from, from + d[i]);
+		}
+	}
 	
 	public static void sgAlloc(SparseGraph sg, int nlen, int ndelen){
 		sg.v = Nauty.dynAlloc1(sg.v, nlen);
