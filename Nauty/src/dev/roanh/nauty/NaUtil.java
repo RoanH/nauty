@@ -1,7 +1,7 @@
 package dev.roanh.nauty;
 
+import dev.roanh.nauty.ds.IntPtr;
 import dev.roanh.nauty.ds.NSet;
-import dev.roanh.nauty.ptr.IntPtr;
 import dev.roanh.nauty.struct.SparseGraph;
 
 public class NaUtil{

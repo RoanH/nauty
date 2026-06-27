@@ -1,4 +1,4 @@
-package dev.roanh.nauty.ptr;
+package dev.roanh.nauty.ds;
 
 public class IntPtr{
 	//use a reference as pointer

@@ -1,8 +1,8 @@
 package dev.roanh.nauty;
 
+import dev.roanh.nauty.ds.IntPtr;
 import dev.roanh.nauty.ds.MarkVal;
 import dev.roanh.nauty.ds.NSet;
-import dev.roanh.nauty.ptr.IntPtr;
 import dev.roanh.nauty.struct.SparseGraph;
 import dev.roanh.nauty.struct.StatsBlk;
 
@@ -179,11 +179,10 @@ public class NauSparse{
 	 * Initialise routine for dispatch vector.  This one just makes sure
 	 * that *hin has enough space and sets fields for n=0.
 	 */
-	public void init_sg(SparseGraph sg, SparseGraph sh, IntPtr status){
+	public void init_sg(SparseGraph sg, SparseGraph sh){
 		SparseGraph.sgAlloc(sh, sg.nv, sg.nde);
 		sh.nv = sg.nv;
 		sh.nde = sg.nde;
-		status.val = 0;
 	}
 
 	/**

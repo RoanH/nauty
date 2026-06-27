@@ -68,7 +68,7 @@ public class Workspace{
 	public void fmperm(int[] perm, int n){
 		int i, k, l;
 
-		Arrays.fill(workperm, 0, n + 1, false);
+		Arrays.fill(workperm, 0, n, false);
 		PruneRecord record = nextRecord();
 		record.clear();
 

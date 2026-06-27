@@ -18,11 +18,6 @@ public class StatsBlk{
 	 */
 	public int numgenerators;
 	/**
-	 * If non-zero : an error code.
-	 */
-	@Deprecated//prefer throws probably?
-	public int errstatus;
-	/**
 	 * Total number of nodes.
 	 */
 	public long numnodes;
@@ -57,6 +52,6 @@ public class StatsBlk{
 	
 	@Override
 	public String toString(){
-		return "StatsBlk[grpsize1=" + grpsize1 + ", grpsize2=" + grpsize2 + ", numorbits=" + numorbits + ", numgenerators=" + numgenerators + ", errstatus=" + errstatus + ", numnodes=" + numnodes + ", numbadleaves=" + numbadleaves + ", maxlevel=" + maxlevel + ", tctotal=" + tctotal + ", canupdates=" + canupdates + ", invapplics=" + invapplics + ", invsuccesses=" + invsuccesses + ", invarsuclevel=" + invarsuclevel + "]";
+		return "StatsBlk[grpsize1=" + grpsize1 + ", grpsize2=" + grpsize2 + ", numorbits=" + numorbits + ", numgenerators=" + numgenerators + ", numnodes=" + numnodes + ", numbadleaves=" + numbadleaves + ", maxlevel=" + maxlevel + ", tctotal=" + tctotal + ", canupdates=" + canupdates + ", invapplics=" + invapplics + ", invsuccesses=" + invsuccesses + ", invarsuclevel=" + invarsuclevel + "]";
 	}
 }

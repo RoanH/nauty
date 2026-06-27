@@ -1,8 +1,8 @@
 package dev.roanh.nauty;
 
+import dev.roanh.nauty.ds.IntPtr;
 import dev.roanh.nauty.ds.NSet;
 import dev.roanh.nauty.ds.Workspace;
-import dev.roanh.nauty.ptr.IntPtr;
 import dev.roanh.nauty.struct.SparseGraph;
 import dev.roanh.nauty.struct.StatsBlk;
 import dev.roanh.nauty.struct.TCNode;
@@ -12,16 +12,6 @@ public class Nauty{
 	 * Max graph size is 2 billion.
 	 */
 	public static final int NAUTY_INFINITY = 2000000002;
-	/**
-	 * Doesn't really make sense in Java, can probably remove this completely.
-	 */
-	@Deprecated
-	public static final int WORDSIZE = 32;//derive m from n where ever still needed using SETWORDSNEEDED
-	
-	//TODO how to handle errors... probably just throw tbh?
-	public static final int NAUTY_ABORTED = -11;
-	public static final int NAUTY_KILLED = -12;
-	
 	/**
 	 * We only support sparse nauty the dispatch vector and invar procedure are hard wired.
 	 */
@@ -46,10 +36,6 @@ public class Nauty{
 	private int mininvarlevel = 0;
 	/* max level for invariant computation */
 	private int maxinvarlevel = 999;
-	/* value passed to (*invarproc)() */
-	private final int invararg = 0;
-	@Deprecated
-	final boolean doschreier = false;
 	
 	/* local versions of some of the arguments: */
 	int n;
@@ -84,7 +70,7 @@ int gca_first, /* level of greatest common ancestor of
                       gca_canon */
     cosetindex;    /* the point being fixed at level gca_first */
 
-boolean needshortprune;  /* used to flag calls to shortprune */
+	boolean needshortprune;  /* used to flag calls to shortprune */
 	
 	private NSet fixedpts = null;
 	private NSet active = null;
@@ -111,8 +97,6 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	void nauty(SparseGraph g_arg, int[] lab, int[] ptn, int[] orbits_arg, StatsBlk stats_arg, int worksize, int n_arg, SparseGraph canong_arg) throws InterruptedException{
 		int i;
 		final IntPtr numcells = new IntPtr();
-		int retval;
-		final IntPtr initstatus = new IntPtr();
 
 		/* check for excessive sizes: */
 
@@ -126,7 +110,6 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 			stats_arg.grpsize2 = 0;
 			stats_arg.numorbits = 0;
 			stats_arg.numgenerators = 0;
-			stats_arg.errstatus = 0;
 			stats_arg.numnodes = 1;
 			stats_arg.numbadleaves = 0;
 			stats_arg.maxlevel = 1;
@@ -136,11 +119,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 			stats_arg.invsuccesses = 0;
 			stats_arg.invarsuclevel = 0;
 
-			initstatus.val = 0;
-			nauSparse.init_sg(g_arg, canong_arg, initstatus);
-			if(initstatus.check()){
-				stats_arg.errstatus = initstatus.val;
-			}
+			nauSparse.init_sg(g_arg, canong_arg);
 
 			return;
 		}
@@ -191,13 +170,8 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 
 		g = null;
 		canong = null;
-		initstatus.val = 0;
 
-		nauSparse.init_sg(g_arg, canong_arg, initstatus);
-		if(initstatus.check()){
-			stats.errstatus = initstatus.val;
-			return;
-		}
+		nauSparse.init_sg(g_arg, canong_arg);
 
 		g = g_arg;
 		canong = canong_arg;
@@ -223,28 +197,21 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 		workspace.reset();
 
 		/* here goes: */
-		stats.errstatus = 0;
 		needshortprune = false;
 		invarsuclevel = NAUTY_INFINITY;
 		invapplics = invsuccesses = 0;
 
-		retval = firstpathnode0(lab, ptn, 1, numcells, tcnode0);
+		firstpathnode0(lab, ptn, 1, numcells, tcnode0);
 
-		if(retval == NAUTY_ABORTED){
-			throw new IllegalStateException("Nauty aborted");
-		}else if(retval == NAUTY_KILLED){
-			throw new IllegalStateException("Nauty killed");
-		}else{
-			if(getcanon){
-				nauSparse.updatecan_sg(g, canong, canonlab, samerows, n);
-				for(i = 0; i < n; ++i){
-					lab[i] = canonlab[i];
-				}
+		if(getcanon){
+			nauSparse.updatecan_sg(g, canong, canonlab, samerows, n);
+			for(i = 0; i < n; ++i){
+				lab[i] = canonlab[i];
 			}
-			stats.invarsuclevel = (invarsuclevel == NAUTY_INFINITY ? 0 : invarsuclevel);
-			stats.invapplics = invapplics;
-			stats.invsuccesses = invsuccesses;
 		}
+		stats.invarsuclevel = (invarsuclevel == NAUTY_INFINITY ? 0 : invarsuclevel);
+		stats.invapplics = invapplics;
+		stats.invsuccesses = invsuccesses;
 	}
 	
 	/**
