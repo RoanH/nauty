@@ -900,11 +900,11 @@ public class NauSparse{
 	}
 
 	private static final int fuzz1(int x){
-		return ((x) ^ FUZZ1[(x)&3]);
+		return ((x) ^ FUZZ1[(x) & 3]);
 	}
 	
 	private static final int fuzz2(int x){
-		return ((x) ^ FUZZ2[(x)&3]);
+		return ((x) ^ FUZZ2[(x) & 3]);
 	}
 
 	/**

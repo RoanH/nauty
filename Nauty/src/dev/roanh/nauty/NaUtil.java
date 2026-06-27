@@ -1,6 +1,5 @@
 package dev.roanh.nauty;
 
-import dev.roanh.nauty.Nauty.PruneRecord;
 import dev.roanh.nauty.ds.NSet;
 import dev.roanh.nauty.ptr.IntPtr;
 import dev.roanh.nauty.struct.SparseGraph;
@@ -50,72 +49,6 @@ public class NaUtil{
 	}
 	
 	/**
-	 * fmperm(perm,fix,mcr,m,n) uses perm to construct fix and mcr.  fix
-	 * contains those points are fixed by perm, while mcr contains the set of
-	 * those points which are least in their orbits.
-	 * 
-	 * GLOBALS ACCESSED: bit<r>
-	 */
-	void fmperm(int[] perm, NSet fix, NSet mcr, /*int m,*/ int n){
-		int i, k, l;
-
-		workperm = Nauty.dynAlloc1(workperm, n);
-
-		fix.clear();
-		mcr.clear();
-
-		for(i = n; --i >= 0;){
-			workperm[i] = 0;
-		}
-
-		for(i = 0; i < n; ++i){
-			if(perm[i] == i){
-				fix.addElement(i);
-				mcr.addElement(i);
-			}else if(workperm[i] == 0){
-				l = i;
-				do{
-					k = l;
-					l = perm[l];
-					workperm[k] = 1;
-				}while(l != i);
-
-				mcr.addElement(i);
-			}
-		}
-	}
-	
-	/**
-	 * fmptn(lab,ptn,level,fix,mcr,m,n) uses the partition at the specified
-	 * level in the partition nest (lab,ptn) to make sets fix and mcr.  fix
-	 * represents the points in trivial cells of the partition, while mcr
-	 * represents those points which are least in their cells.
-	 * 
-	 * GLOBALS ACCESSED: bit<r>
-	 */
-	void fmptn(int[] lab, int[] ptn, int level, NSet fix, NSet mcr, /*int m,*/ int n){
-		int i, lmin;
-
-		fix.clear();
-		mcr.clear();
-
-		for(i = 0; i < n; ++i){
-			if(ptn[i] <= level){
-				fix.addElement(lab[i]);
-				mcr.addElement(lab[i]);
-			}else{
-				lmin = lab[i];
-				do{
-					if(lab[++i] < lmin){
-						lmin = lab[i];
-					}
-				}while(ptn[i] > level);
-				mcr.addElement(lmin);
-			}
-		}
-	}
-
-	/**
 	 * doref(g,lab,ptn,level,numcells,qinvar,invar,active,code,refproc,
 	 *       invarproc,mininvarlev,maxinvarlev,invararg,digraph,m,n)
 	 * is used to perform a refinement on the partition at the given level in
@@ -149,32 +82,23 @@ public class NaUtil{
 			NSet active,
 			IntPtr code,
 			NauSparse nauSparse,
-			    //void (*refproc)(graph*,int*,int*,int,int*,int*,set*,int*,int,int), -> refine_sg
-			    //void (*invarproc)(graph*,int*,int*,int,int,int,int*,int,boolean,int,int), -> adjacencies_sg
 		    int mininvarlev,
 		    int maxinvarlev,
-//		    int invararg,
-//		    boolean digraph,
-//		    int m,
 		    int n
 	    ){
 		
 		int pw;
-		int i, cell1, cell2, nc, /*tvpos,*/minlev, maxlev;
+		int i, cell1, cell2, nc, minlev, maxlev;
 		long longcode;
 		boolean same;
 
 		workperm = Nauty.dynAlloc1(workperm, n);
 
-//	    if ((tvpos = active.nextelement(-1)) < 0){ tvpos = 0;} //tvpos unused by sparse invarproc
-
-//	    (*refproc)(g,lab,ptn,level,numcells,invar,active,code,M,n);
 		nauSparse.refine_sg(g, lab, ptn, level, numcells, active, code, n);
 
 		minlev = (mininvarlev < 0 ? -mininvarlev : mininvarlev);
 		maxlev = (maxinvarlev < 0 ? -maxinvarlev : maxinvarlev);
-		if(/*invarproc != NULL && */numcells.val < n && level >= minlev && level <= maxlev){
-			//(*invarproc)(g,lab,ptn,level,*numcells,tvpos,invar,invararg,digraph,M,n);
+		if(numcells.val < n && level >= minlev && level <= maxlev){
 			nauSparse.adjacencies_sg(g, lab, ptn, level, invar, n);
 			active.clear();
 			for(i = n; --i >= 0;){
@@ -208,7 +132,6 @@ public class NaUtil{
 			if(numcells.val > nc){
 				qinvar.val = 2;
 				longcode = code.val;
-//	            (*refproc)(g,lab,ptn,level,numcells,invar,active,code,M,n);
 				nauSparse.refine_sg(g, lab, ptn, level, numcells, active, code, n);
 				longcode = mash(longcode, code.val);
 				code.val = cleanup(longcode);
@@ -243,16 +166,12 @@ public class NaUtil{
 			IntPtr tcellsize,
 			IntPtr cellpos,
 			int tc_level,
-//			boolean digraph,
 			int hint,
 			NauSparse nauSparse,
-		    	//int (*targetcell)(graph*,int*,int*,int,int,boolean,int,int,int), -> targetcell_sg
-//		    int m,
 		    int n
 	    ){
 		int i, j, k;
 
-//	    i = (*targetcell)(g,lab,ptn,level,tc_level,digraph,hint,m,n);
 		i = nauSparse.targetcell_sg(g, lab, ptn, level, tc_level, hint, n);
 		for(j = i + 1; ptn[j] > level; ++j){
 		}
@@ -265,15 +184,6 @@ public class NaUtil{
 		}
 
 		cellpos.val = i;
-	}
-
-	/**
-	 * shortprune(set1,set2,m) ANDs the contents of set set2 into set set1.
-	 * 
-	 * GLOBALS ACCESSED: NONE
-	 */
-	static void shortprune(NSet set1, NSet set2/*, int m*/){
-		set1.intersect(set2);
 	}
 
 	/**
@@ -301,25 +211,6 @@ public class NaUtil{
 		}while(prev != tv);
 
 		ptn[tc] = level;
-	}
-	
-
-	/**
-	 * longprune(tcell,fix,bottom,top,m) removes zero or elements of the set
-	 * tcell.  It is assumed that addresses bottom through top-1 contain
-	 * contiguous pairs of sets (f1,m1),(f2,m2), ... .  tcell is intersected
-	 * with each mi such that fi is a subset of fix.
-	 * 
-	 * GLOBALS ACCESSED: NONE
-	 */
-	//longprune(set *tcell, set *fix, set *bottom, set *top, int m) | workspace = bottom
-	static void longprune(NSet tcell, NSet fix, PruneRecord[] workspace, int top){
-		for(int i = 0; i < top; i++){
-	        PruneRecord record = workspace[i];
-			if(!fix.notSubSet(record.f())){
-				tcell.intersect(record.m());
-			}
-		}
 	}
 	
 	/**

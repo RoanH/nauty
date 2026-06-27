@@ -1,6 +1,7 @@
 package dev.roanh.nauty;
 
 import dev.roanh.nauty.ds.NSet;
+import dev.roanh.nauty.ds.Workspace;
 import dev.roanh.nauty.ptr.IntPtr;
 import dev.roanh.nauty.struct.OptionBlk;
 import dev.roanh.nauty.struct.SparseGraph;
@@ -95,6 +96,8 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	int[] firstcode = dynAllStat();
 	int[] canoncode = dynAllStat();
 	
+	private Workspace workspace;
+	
 	/* In the dynamically allocated case (MAXN=0), each level of recursion
 	   needs one set (tcell) to represent the target cell.  This is
 	   implemented by using a linked list of tcnode anchored at the root
@@ -104,22 +107,8 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	   tcnodes and tcells are kept between calls to nauty, except that
 	   they are freed and reallocated if m gets bigger than alloc_m.  */
 	TCNode tcnode0 = new TCNode();
-//	@Deprecated
-//	int alloc_m = 0;
 	int alloc_n = 0;
 	
-	record PruneRecord(NSet f, NSet m){
-		
-		PruneRecord(int n){
-			this(new NSet(n), new NSet(n));
-		}
-	}
-	
-	PruneRecord[] workspace;//first and just-after-last addresses of work area to hold automorphism data, space is a first address pointer in C
-//	int worktop;//implemented as a length from workspace instead of pointer | workspace.length
-	int fmptr;                   /* pointer into workspace */
-	
-	//TODO call with worksize = 500 instead of 2*500*m
 //	void nauty(SparseGraph g_arg, int[] lab, int[] ptn, NSet active_arg, int[] orbits_arg, OptionBlk options, StatsBlk stats_arg, NSet ws_arg, int worksize, int m_arg, int n_arg, SparseGraph canong_arg){
 	void nauty(SparseGraph g_arg, int[] lab, int[] ptn, int[] orbits_arg, OptionBlk options, StatsBlk stats_arg, /*NSet ws_arg,*/ int worksize, /*int m_arg,*/ int n_arg, SparseGraph canong_arg) throws InterruptedException{
 		int i;
@@ -134,9 +123,6 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 
 		/* check for excessive sizes: */
 
-//		if(m_arg > NAUTY_INFINITY / WORDSIZE + 1){
-//			throw new IllegalArgumentException("nauty: need m <= %d, but m=%d".formatted(NAUTY_INFINITY / WORDSIZE + 1, m_arg));
-//		}
 		if(n_arg > NAUTY_INFINITY - 2 /*|| n_arg > WORDSIZE * m_arg*/){
 			throw new IllegalArgumentException("nauty: need n <= min(%d,%d*m), but n=%d".formatted(NAUTY_INFINITY - 2, WORDSIZE, n_arg));
 		}
@@ -167,7 +153,6 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 		}
 
 		/* take copies of some args, and options: */
-//		m = m_arg;
 		n = n_arg;
 
 		defltwork = new NSet(2 * n);
@@ -277,11 +262,10 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 		noncheaplevel = 1;
 		eqlev_canon = -1; /* needed even if !getcanon */
 
-		workspace = new PruneRecord[worksize];
-		fmptr = 0;
-		for(i = 0; i < workspace.length; i++){
-			workspace[i] = new PruneRecord(n);
+		if(workspace == null || !workspace.canFit(worksize, n)){
+			workspace = new Workspace(worksize, n);
 		}
+		workspace.reset();
 
 		/* here goes: */
 		stats.errstatus = 0;
@@ -403,16 +387,18 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 					++childcount;
 				}
 				fixedpts.delElement(tv);
-				if(rtnlevel < level)
+				if(rtnlevel < level){
 					return rtnlevel;
+				}
 				if(needshortprune){
 					needshortprune = false;
-					NaUtil.shortprune(tcell, workspace[fmptr - 1].m());
+					workspace.shortprune(tcell);
 				}
 				recover(ptn, level);
 			}
-			if(orbits[tv] == tv1) /* ie, in same orbit as tv1 */
+			if(orbits[tv] == tv1){ /* ie, in same orbit as tv1 */
 				++index;
+			}
 		}
 		multiply(stats, index);
 
@@ -514,7 +500,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 		}
 		if(needshortprune){
 			needshortprune = false;
-			NaUtil.shortprune(tcell, workspace[fmptr - 1].m());
+			workspace.shortprune(tcell);
 		}
 
 		if(!nauSparse.cheapautom_sg(ptn, level, digraph, n)){
@@ -534,10 +520,10 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 			/* use stored automorphism data to prune target cell: */
 			if(needshortprune){
 				needshortprune = false;
-				NaUtil.shortprune(tcell, workspace[fmptr - 1].m());
+				workspace.shortprune(tcell);
 			}
 			if(tv == tv1){
-				NaUtil.longprune(tcell, fixedpts, workspace, fmptr);
+				workspace.longprune(tcell, fixedpts);
 			}
 
 			recover(ptn, level);
@@ -662,21 +648,13 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 			return level;
 
 		case 1: /* lab is equivalent to firstlab */
-			if(fmptr == workspace.length){
-				fmptr--;
-			}
-			naUtil.fmperm(workperm, workspace[fmptr].f(), workspace[fmptr].m(), n);
-			fmptr++;
+			workspace.fmperm(workperm, n);
 			stats.numorbits = naUtil.orbjoin(orbits, workperm, n);
 			++stats.numgenerators;
 			return gca_first;
 
 		case 2: /* lab is equivalent to canonlab */
-			if(fmptr == workspace.length){
-				fmptr--;
-			}
-			naUtil.fmperm(workperm, workspace[fmptr].f(), workspace[fmptr].m(), n);
-			fmptr++;
+			workspace.fmperm(workperm, n);
 			save = stats.numorbits;
 			stats.numorbits = naUtil.orbjoin(orbits, workperm, n);
 			if(stats.numorbits == save){
@@ -713,11 +691,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 		/* only cases 3 and 4 get this far: */
 		if(level != noncheaplevel){
 			ispruneok = true;
-			if(fmptr == workspace.length){
-				fmptr--;
-			}
-			naUtil.fmptn(lab, ptn, noncheaplevel, workspace[fmptr].f(), workspace[fmptr].m(), n);
-			fmptr++;
+			workspace.fmptn(lab, ptn, noncheaplevel, n);
 		}else{
 			ispruneok = false;
 		}
