@@ -414,7 +414,7 @@ public class SortTemplates{
 		arr[y] = tmp;
 	}
 
-	//TODO consider turning this into two local int[] arrays for better CPU locality
+	//TODO consider turning this into two local int[] arrays for better CPU cache locality
 	private static record StackEntry(int addr, int len){
 	}
 }

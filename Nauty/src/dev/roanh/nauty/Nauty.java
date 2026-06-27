@@ -3,7 +3,6 @@ package dev.roanh.nauty;
 import dev.roanh.nauty.ds.NSet;
 import dev.roanh.nauty.ds.Workspace;
 import dev.roanh.nauty.ptr.IntPtr;
-import dev.roanh.nauty.struct.OptionBlk;
 import dev.roanh.nauty.struct.SparseGraph;
 import dev.roanh.nauty.struct.StatsBlk;
 import dev.roanh.nauty.struct.TCNode;
@@ -23,8 +22,6 @@ public class Nauty{
 	public static final int NAUTY_ABORTED = -11;
 	public static final int NAUTY_KILLED = -12;
 	
-	//TODO probably going to have instances of nauty
-	
 	/**
 	 * We only support sparse nauty the dispatch vector and invar procedure are hard wired.
 	 */
@@ -33,24 +30,28 @@ public class Nauty{
 	
 	//TODO fix the copies below to final constants equal to the sparse options and clear some branches
 	/* copies of some of the options: */
+	/* make canong and canonlab? */
 	final boolean getcanon = true;
+	/* multiple edges or loops? */
 	final boolean digraph = true;
+	/* write automorphisms? */
 	final boolean writeautoms = false;
+	/* write stats on pts fixed, etc.? */
 	final boolean domarkers = false;
+	/* use cartesian rep for writing automs? */
 	final boolean cartesian = false;
-//	int linelength;
-	int tc_level,mininvarlevel,maxinvarlevel,invararg;
-//	@Deprecated//these are all null
-//	Object usernodeproc, userautomproc, userlevelproc, usercanonproc;
-//	@Deprecated
-//	Object invarproc;//TODO type -> use nausparse.adjacencies_sg
-	//TODO outfile ignored
+	/* max level for smart target cell choosing */
+	private int tc_level;
+	/* min level for invariant computation */
+	private int mininvarlevel = 0;
+	/* max level for invariant computation */
+	private int maxinvarlevel = 999;
+	/* value passed to (*invarproc)() */
+	private final int invararg = 0;
 	@Deprecated
 	final boolean doschreier = false;
 	
 	/* local versions of some of the arguments: */
-//	@Deprecated
-//	int m;
 	int n;
 	SparseGraph g,canong;
 	int[] orbits;
@@ -85,8 +86,6 @@ int gca_first, /* level of greatest common ancestor of
 
 boolean needshortprune;  /* used to flag calls to shortprune */
 	
-@Deprecated//tiny default fallback set
-	private NSet defltwork = null;
 	private NSet fixedpts = null;
 	private NSet active = null;
 	int[] workperm = dynAllStat();
@@ -109,22 +108,16 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 	TCNode tcnode0 = new TCNode();
 	int alloc_n = 0;
 	
-//	void nauty(SparseGraph g_arg, int[] lab, int[] ptn, NSet active_arg, int[] orbits_arg, OptionBlk options, StatsBlk stats_arg, NSet ws_arg, int worksize, int m_arg, int n_arg, SparseGraph canong_arg){
-	void nauty(SparseGraph g_arg, int[] lab, int[] ptn, int[] orbits_arg, OptionBlk options, StatsBlk stats_arg, /*NSet ws_arg,*/ int worksize, /*int m_arg,*/ int n_arg, SparseGraph canong_arg) throws InterruptedException{
+	void nauty(SparseGraph g_arg, int[] lab, int[] ptn, int[] orbits_arg, StatsBlk stats_arg, int worksize, int n_arg, SparseGraph canong_arg) throws InterruptedException{
 		int i;
 		final IntPtr numcells = new IntPtr();
 		int retval;
 		final IntPtr initstatus = new IntPtr();
-		TCNode tcp;
-		TCNode tcq;
-
-		/* determine dispatch vector */
-		//dispatch vector will be 'hardcoded' to sparse nauty
 
 		/* check for excessive sizes: */
 
-		if(n_arg > NAUTY_INFINITY - 2 /*|| n_arg > WORDSIZE * m_arg*/){
-			throw new IllegalArgumentException("nauty: need n <= min(%d,%d*m), but n=%d".formatted(NAUTY_INFINITY - 2, WORDSIZE, n_arg));
+		if(n_arg > NAUTY_INFINITY - 2){
+			throw new IllegalArgumentException("nauty: need n <= %d, but n=%d".formatted(NAUTY_INFINITY - 2, n_arg));
 		}
 
 		if(n_arg == 0) /* Special code for zero-sized graph */
@@ -144,7 +137,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 			stats_arg.invarsuclevel = 0;
 
 			initstatus.val = 0;
-			nauSparse.init_sg(g_arg, canong_arg, options, initstatus);
+			nauSparse.init_sg(g_arg, canong_arg, initstatus);
 			if(initstatus.check()){
 				stats_arg.errstatus = initstatus.val;
 			}
@@ -155,7 +148,6 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 		/* take copies of some args, and options: */
 		n = n_arg;
 
-		defltwork = new NSet(2 * n);
 		fixedpts = new NSet(n);
 		active = new NSet(n);
 		workperm = dynAlloc1(workperm, n);
@@ -173,64 +165,27 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 		orbits = orbits_arg;
 		stats = stats_arg;
 
-//		getcanon = options.getcanon;
-//		digraph = options.digraph;
-//		writeautoms = options.writeautoms;
-//		domarkers = options.writemarkers;
-//		cartesian = options.cartesian;
-//		linelength = options.linelength;
-		if(digraph){
-			tc_level = 0;
-		}else{
-			tc_level = options.tc_level;
-		}
-
-		if(options.mininvarlevel < 0 && getcanon){
-			mininvarlevel = -options.mininvarlevel;
-		}else{
-			mininvarlevel = options.mininvarlevel;
-		}
-		if(options.maxinvarlevel < 0 && getcanon){
-			maxinvarlevel = -options.maxinvarlevel;
-		}else{
-			maxinvarlevel = options.maxinvarlevel;
-		}
-		invararg = options.invararg;
-
-		if(getcanon){
-			if(canong_arg == null){
-				throw new IllegalArgumentException("nauty: canong=NULL but options.getcanon=TRUE");
-			}
-		}
+		tc_level = digraph ? 0 : 100;
+		mininvarlevel = 0;
+		maxinvarlevel = 999;
 
 		/* initialize everything: */
 
-		if(false){//TODO fixed to false
-//	        for (i = 0; i < n; ++i){   /* give all verts same colour */
-//	            lab[i] = i;
-//	            ptn[i] = NAUTY_INFINITY;
-//	        }
-//	        ptn[n-1] = 0;
-//	        EMPTYSET(active,m);
-//	        ADDELEMENT(active,0);
-//	        numcells = 1;
-		}else{
-			ptn[n - 1] = 0;
-			numcells.val = 0;
-			for(i = 0; i < n; ++i){
-				if(ptn[i] != 0){
-					ptn[i] = NAUTY_INFINITY;
-				}else{
-					++numcells.val;
-				}
+		ptn[n - 1] = 0;
+		numcells.val = 0;
+		for(i = 0; i < n; ++i){
+			if(ptn[i] != 0){
+				ptn[i] = NAUTY_INFINITY;
+			}else{
+				++numcells.val;
 			}
+		}
 
-			active.clear();
-			for(i = 0; i < n; ++i){
-				active.addElement(i);
-				while(ptn[i] != 0){
-					++i;
-				}
+		active.clear();
+		for(i = 0; i < n; ++i){
+			active.addElement(i);
+			while(ptn[i] != 0){
+				++i;
 			}
 		}
 
@@ -238,7 +193,7 @@ boolean needshortprune;  /* used to flag calls to shortprune */
 		canong = null;
 		initstatus.val = 0;
 
-		nauSparse.init_sg(g_arg, canong_arg, options, initstatus);
+		nauSparse.init_sg(g_arg, canong_arg, initstatus);
 		if(initstatus.check()){
 			stats.errstatus = initstatus.val;
 			return;

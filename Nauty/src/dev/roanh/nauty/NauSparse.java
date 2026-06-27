@@ -3,34 +3,13 @@ package dev.roanh.nauty;
 import dev.roanh.nauty.ds.MarkVal;
 import dev.roanh.nauty.ds.NSet;
 import dev.roanh.nauty.ptr.IntPtr;
-import dev.roanh.nauty.struct.OptionBlk;
 import dev.roanh.nauty.struct.SparseGraph;
 import dev.roanh.nauty.struct.StatsBlk;
 
 public class NauSparse{
 	private static final int[] FUZZ1 = new int[]{037541, 061532, 005257, 026416};
 	private static final int[] FUZZ2 = new int[]{006532, 070236, 035523, 062437};
-
-	//just extracts v/d/e
-	//#define SG_VDE(sgp,vv,dd,ee) do { vv = ((sparsegraph*)(sgp))->v; \
-	//  dd = ((sparsegraph*)(sgp))->d; ee = ((sparsegraph*)(sgp))->e; } while(0)
-
-	
-	/*	DispatchVec dispatch_sparse =
-	  {
-	  isautom_sg,
-	  testcanlab_sg,
-	  updatecan_sg,
-	  refine_sg,
-	  refine_sg,
-	  cheapautom_sg,
-	   targetcell_sg,
-	   nausparse_freedyn, -> irrelevant GC
-	   nausparse_check, -> probably could ignore
-	   init_sg,NULL
-	   };
-	*/
-
+	private static final int DEFAULT_WORKSIZE = 500;
 	private final MarkVal vmark1 = new MarkVal();
 	private final MarkVal vmark2 = new MarkVal();
 	private int[] work1 = Nauty.dynAllStat();
@@ -39,15 +18,13 @@ public class NauSparse{
 	private int[] work4 = Nauty.dynAllStat();
 
 	public static void sparsenauty(Nauty nauty, SparseGraph g, int[] lab, int[] ptn, int[] orbits, StatsBlk stats, SparseGraph h) throws InterruptedException{
-		//TODO remove null arg?
-		nauty.nauty(g, lab, ptn, orbits, new OptionBlk(), stats, 500, g.nv, h);
+		nauty.nauty(g, lab, ptn, orbits, stats, DEFAULT_WORKSIZE, g.nv, h);
 	}
 
 	/**
 	 * isautom_sg(g,perm,digraph,m,n) = TRUE iff perm is an automorphism of g
 	 * (i.e., g^perm = g).  Symmetry is assumed unless digraph = TRUE.
 	 */
-//	public boolean isautom_sg(SparseGraph g, int[] p, boolean digraph, int m, int n){
 	public boolean isautom_sg(SparseGraph g, int[] p, boolean digraph, int n){
 		int[] d = g.d;
 		int[] e = g.e;
@@ -88,7 +65,6 @@ public class NauSparse{
 	 * value returned is -1,0,1 if g^lab <,=,> canong.  *samerows is set to
 	 * the number of rows (0..n) of canong which are the same as those of g^lab.
 	 */
-//	public int testcanlab_sg(SparseGraph g, SparseGraph canong, int[] lab, IntPtr samerows, int m, int n){
 	public int testcanlab_sg(SparseGraph g, SparseGraph canong, int[] lab, IntPtr samerows, int n){
 		int[] d = g.d;
 		int[] e = g.e;
@@ -160,7 +136,6 @@ public class NauSparse{
 	 * the first samerows vertices of canong are ok already.  Also assumes
 	 * contiguity and ample space in canong.
 	 */
-//	public void updatecan_sg(SparseGraph g, SparseGraph canong, int[] lab, int samerows, int m, int n){
 	public void updatecan_sg(SparseGraph g, SparseGraph canong, int[] lab, int samerows, int n){
 		int[] d = g.d;
 		int[] e = g.e;
@@ -204,18 +179,10 @@ public class NauSparse{
 	 * Initialise routine for dispatch vector.  This one just makes sure
 	 * that *hin has enough space and sets fields for n=0.
 	 */
-//	public void init_sg(SparseGraph gin, SparseGraph[] gout, SparseGraph hin, SparseGraph[] hout, int[] lab, int[] ptn, NSet active, OptionBlk options, IntPtr status, int m, int n){
-	public void init_sg(SparseGraph gin, SparseGraph hin, OptionBlk options, IntPtr status){
-		SparseGraph sg;
-		SparseGraph sh;
-
-		if(/*options.getcanon*/true){
-			sg = gin;
-			sh = hin;
-			SparseGraph.sgAlloc(sh, sg.nv, sg.nde);
-			sh.nv = sg.nv;
-			sh.nde = sg.nde;
-		}
+	public void init_sg(SparseGraph sg, SparseGraph sh, IntPtr status){
+		SparseGraph.sgAlloc(sh, sg.nv, sg.nde);
+		sh.nv = sg.nv;
+		sh.nde = sg.nde;
 		status.val = 0;
 	}
 
@@ -271,7 +238,6 @@ public class NauSparse{
 	 * algorithm, but which is independent of the labelling of the graph.
 	 * count is used for work space.
 	 */
-//	public void refine_sg(SparseGraph g, int[] lab, int[] ptn, int level, IntPtr numcells, IntPtr count, NSet active, IntPtr code, int m, int n){
 	public void refine_sg(SparseGraph g, int[] lab, int[] ptn, int level, IntPtr numcells, NSet active, IntPtr code, int n){
 		int i, j, k, l, v1, v2, v3, isplit;
 		int w1, w2, w3;
@@ -386,9 +352,8 @@ public class NauSparse{
 
 				longcode = mash(longcode, w2);
 				longcode = mash(longcode, v2);
-				if(j != v2) /* At least two fragments
+				if(j != v2){ /* At least two fragments
 				                 * v1..v2-1 = w1; v2..v3-1 = w2  */
-				{
 					if(v2 == v1 + 1){
 						CELLSTART[lab[v1]] = n;
 					}
@@ -546,8 +511,7 @@ public class NauSparse{
 						}
 					}
 				}
-			}else /* non-trivial splitting */
-			{
+			}else{ /* non-trivial splitting */
 				/* isplit is the start of the splitting cell.
 				Set HITS[i] = hits of i for i in non-trivial cells,
 				HITCELL[0..hitcells-1] = starts of hit non-trivial cells */
@@ -627,9 +591,8 @@ public class NauSparse{
 
 					longcode = mash(longcode, w1);
 					longcode = mash(longcode, v2);
-					if(j != v2) /* At least two fragments
+					if(j != v2){ /* At least two fragments
 					             * v1..v2-1 = w1; v2..v3-1 = w2  */
-					{
 						if(v2 == v1 + 1){
 							CELLSTART[lab[v1]] = n;
 						}
@@ -717,15 +680,13 @@ public class NauSparse{
 	 * partition finer than one for which it returns TRUE.
 	 */
 	public boolean cheapautom_sg(int[] ptn, int level, boolean digraph, int n){
-		int i, k, nnt;
-
-		if(digraph){
+		if(digraph){//TODO technically always true (?)
 			return false;
 		}
 
-		k = n;
-		nnt = 0;
-		for(i = 0; i < n; ++i){
+		int k = n;
+		int nnt = 0;
+		for(int i = 0; i < n; ++i){
 			--k;
 			if(ptn[i] > level){
 				++nnt;
@@ -745,7 +706,6 @@ public class NauSparse{
 	 * to the greatest number of other cells, assuming equitability.
 	 * This is not good for digraphs!
 	 */
-//	public int bestcell_sg(SparseGraph g, int[] lab, int[] ptn, int level, int tc_level, int m, int n){
 	public int bestcell_sg(SparseGraph g, int[] lab, int[] ptn, int level, int n){
 		int nnt;
 		int[] d = g.d;
@@ -760,9 +720,7 @@ public class NauSparse{
 		work3 = Nauty.dynAlloc1(work3, n);
 		work4 = Nauty.dynAlloc1(work4, n);
 		final int sizeOffset = n / 2;//alternative to work1b
-//	    work1b = work1 + (n/2);
 		final int[] START = work1;
-//	    #define SIZE     work1b
 		final int[] NNTCELL = work2;
 		final int[] HITS = work3;
 		final int[] COUNT = work4;
@@ -825,11 +783,12 @@ public class NauSparse{
 
 		j = 0;
 		maxcnt = COUNT[0];
-		for(i = 1; i < nnt; ++i)
+		for(i = 1; i < nnt; ++i){
 			if(COUNT[i] > maxcnt){
 				j = i;
 				maxcnt = COUNT[i];
 			}
+		}
 
 		return START[j];
 	}
@@ -841,7 +800,6 @@ public class NauSparse{
 	 * Otherwise we use bestcell() up to tc_level and the first non-trivial
 	 * cell after that.
 	 */
-//	public int targetcell_sg(SparseGraph g, int[] lab, int[] ptn, int level, int tc_level, boolean digraph, int hint, int m, int n){
 	public int targetcell_sg(SparseGraph g, int[] lab, int[] ptn, int level, int tc_level, int hint, int n){
 		int i;
 
@@ -862,7 +820,6 @@ public class NauSparse{
 	 * better partitioning that the normal refinement routine for digraphs.
 	 * It will not help with undirected graphs in nauty at all.
 	 */
-//	public void adjacencies_sg(SparseGraph g, int[] lab, int[] ptn, int level, int numcells, int tvpos, int[] invar, int invararg, boolean digraph, int m, int n){
 	public void adjacencies_sg(SparseGraph g, int[] lab, int[] ptn, int level, int[] invar, int n){
 		int[] d = g.d;
 		int[] e = g.e;
@@ -870,7 +827,6 @@ public class NauSparse{
 		int di;
 		int i;
 		int[] v = g.v;
-		int j;
 
 		work2 = Nauty.dynAlloc1(work2, n);
 
@@ -887,7 +843,7 @@ public class NauSparse{
 			vwt = fuzz1(work2[i]);
 			wwt = 0;
 			di = d[i];
-			for(j = 0; j < di; ++j){
+			for(int j = 0; j < di; ++j){
 				wwt = accum(wwt, fuzz2(work2[e[v[i] + j]]));
 				invar[e[v[i] + j]] = accum(invar[e[v[i] + j]], vwt);
 			}

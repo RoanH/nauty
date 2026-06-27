@@ -51,7 +51,7 @@ public class Workspace{
 	 */
 	public void longprune(NSet tcell, NSet fix){
 		for(int i = 0; i < fmptr; i++){
-	        PruneRecord record = records[i];
+			PruneRecord record = records[i];
 			if(!fix.notSubSet(record.fix())){
 				tcell.intersect(record.mcr());
 			}
