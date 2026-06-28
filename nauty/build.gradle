@@ -1,0 +1,137 @@
+plugins{
+	id 'eclipse'
+	id 'java-library'
+	id 'maven-publish'
+	id 'signing'
+	id 'com.github.spotbugs' version '6.4.8'
+	id 'jacoco'
+}
+
+import com.github.spotbugs.snom.Confidence
+import com.github.spotbugs.snom.Effort
+
+sourceSets{
+	main.java.srcDirs = ['src']
+	test.java.srcDirs = ['test']
+}
+
+dependencies{
+	testImplementation("org.junit.jupiter:junit-jupiter:5.12.0")
+	testImplementation("org.junit.platform:junit-platform-launcher")
+}
+
+repositories{
+	//Local cache
+	if(project.hasProperty("nexusPublic")){
+		maven{
+			allowInsecureProtocol = true
+			url = "$nexusPublic"
+		}
+	}
+	mavenCentral()
+}
+
+version = findProperty("refName") ?: 'SNAPSHOT'
+if(version.matches("v\\d+\\.\\d+")){
+	version = version.substring(1)
+}
+
+eclipse.classpath.downloadSources = true
+eclipse.classpath.downloadJavadoc = true
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+jacocoTestReport.reports.xml.required = true
+java.sourceCompatibility = 1.25
+javadoc.options.memberLevel = JavadocMemberLevel.PRIVATE
+javadoc.options.encoding = 'UTF-8'
+group = 'dev.roanh.nauty'
+ext.artifact = 'nauty'
+
+test{
+	useJUnitPlatform()
+	dependsOn 'cleanTest'
+
+	testLogging{
+		events "passed", "skipped", "failed"
+		showStandardStreams = true
+	}
+}
+
+spotbugs{
+	showProgress = true
+	effort = Effort.valueOf('MAX')
+	reportLevel = Confidence.valueOf('LOW')
+	excludeFilter = file("$rootDir/exclude.xml")
+}
+
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask){
+	reports{
+		html{
+			required = true
+			outputLocation = file("$buildDir/reports/spotbugs/main/spotbugs.html")
+			stylesheet = 'fancy-hist.xsl'
+		}
+	}
+}
+
+java{
+	withSourcesJar()
+	withJavadocJar()
+}
+
+publishing{
+	publications{
+		mavenJava(MavenPublication){
+			from components.java
+			artifactId = project.artifact
+
+			pom{
+				name = project.eclipse.project.name
+				description = 'Java implementation of nauty.'
+				url = 'https://github.com/RoanH/nauty'
+				licenses{
+					license{
+						name = 'GNU General Public License v3.0'
+						url = 'https://www.gnu.org/licenses/gpl-3.0.txt'
+					}
+				}
+				developers{
+					developer{
+						id = 'RoanH'
+						name = 'Roan Hofland'
+						email = 'roan@roanh.dev'
+					}
+				}
+				scm{
+					connection = 'scm:git:git@github.com:RoanH/nauty.git'
+					developerConnection = 'scm:git:git@git.roanh.dev:roan/nauty.git'
+					url = 'https://github.com/RoanH/nauty'
+				}
+			}
+		}
+	}
+
+	repositories{
+		maven{
+			url "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
+			credentials{
+				username findProperty("OSSRH_USER")
+				password findProperty("OSSRH_PASS")
+			}
+		}
+	}
+}
+
+jar{
+	into("META-INF/maven/$project.group/$project.artifact"){
+		from{
+			generatePomFileForMavenJavaPublication
+		}
+		rename ".*", "pom.xml"
+	}
+}
+
+signing{
+	useInMemoryPgpKeys(findProperty("signingKeyId"), findProperty("signingKey"), findProperty("signingPassword"))
+	sign publishing.publications.mavenJava
+}
