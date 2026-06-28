@@ -65,7 +65,7 @@ public class NautyTest{
 		
 		assertArrayEquals(
 			new int[]{2, 1, 5, 3, 4, 0},
-			nauty.computeCanonicalLabelling(g, lab, ptn).relabelling()
+			nauty.computeCanonicalLabelling(g, lab, ptn).getRelabelling()
 		);
 	}
 	
@@ -82,7 +82,7 @@ public class NautyTest{
 		
 		assertArrayEquals(
 			new int[]{1, 2, 0},
-			nauty.computeCanonicalLabelling(g, lab, ptn).relabelling()
+			nauty.computeCanonicalLabelling(g, lab, ptn).getRelabelling()
 		);
 	}
 	
@@ -99,7 +99,7 @@ public class NautyTest{
 		
 		assertArrayEquals(
 			new int[]{0, 2, 1},
-			nauty.computeCanonicalLabelling(g, lab, ptn).relabelling()
+			nauty.computeCanonicalLabelling(g, lab, ptn).getRelabelling()
 		);
 	}
 	
@@ -116,7 +116,7 @@ public class NautyTest{
 		
 		assertArrayEquals(
 			new int[]{0, 1, 2},
-			nauty.computeCanonicalLabelling(g, lab, ptn).relabelling()
+			nauty.computeCanonicalLabelling(g, lab, ptn).getRelabelling()
 		);
 	}
 	
@@ -135,7 +135,7 @@ public class NautyTest{
 		
 		assertArrayEquals(
 			new int[]{0, 3, 2, 1},
-			nauty.computeCanonicalLabelling(g, lab, ptn).relabelling()
+			nauty.computeCanonicalLabelling(g, lab, ptn).getRelabelling()
 		);
 	}
 	
@@ -154,7 +154,7 @@ public class NautyTest{
 		
 		assertArrayEquals(
 			new int[]{1, 2, 0, 3},
-			nauty.computeCanonicalLabelling(g, lab, ptn).relabelling()
+			nauty.computeCanonicalLabelling(g, lab, ptn).getRelabelling()
 		);
 	}
 	
@@ -177,7 +177,7 @@ public class NautyTest{
 		
 		assertArrayEquals(
 			new int[]{0, 2, 1, 3},
-			nauty.computeCanonicalLabelling(g, lab, ptn).relabelling()
+			nauty.computeCanonicalLabelling(g, lab, ptn).getRelabelling()
 		);
 		
 	}
@@ -201,7 +201,7 @@ public class NautyTest{
 		
 		assertArrayEquals(
 			new int[]{0, 1, 2, 3},
-			nauty.computeCanonicalLabelling(g, lab, ptn).relabelling()
+			nauty.computeCanonicalLabelling(g, lab, ptn).getRelabelling()
 		);
 		
 	}

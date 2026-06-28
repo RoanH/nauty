@@ -17,7 +17,6 @@ public class NautyApi{
 		SparseGraph canon = new SparseGraph();
 		StatsBlk stats = new StatsBlk();
 		NauSparse.sparsenauty(nauty, graph, labels, ptn, stats, canon);
-		canon.sort();//TODO do I always want to sort without knowing what the caller wants?
 		return new CanonicalResult(labels, canon, stats);
 	}
 	
