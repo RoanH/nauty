@@ -84,61 +84,6 @@ public class NautyApi{
 		
 		
 		
-//		{
-//			SparseGraph g = new SparseGraph();
-//			g.nv = 3;
-//			g.nde = 2;
-//			g.d = new int[]{0, 1, 1};
-//			g.v = new int[]{0, 0, 1};
-//			g.e = new int[]{
-//				0,
-//				0
-//			};
-//
-//			int[] lab = new int[]{0, 1, 2};
-//			int[] ptn = new int[]{1, 1, 1};
-//
-//			nauty.computeCanonicalLabelling(g, lab, ptn);
-//		}
-//
-//		{
-//			SparseGraph g = new SparseGraph();
-//			SparseGraph.sgAlloc(g, 3, 2);
-//			g.nv = 3;
-//			g.nde = 2;
-//			g.d = new int[]{1, 0, 1};
-//			g.v = new int[]{0, 1, 1};
-//			g.e = new int[]{
-//				1,
-//				1
-//			};
-//
-//			int[] lab = {0,1,2};
-//			int[] ptn = {1,1,1};
-//
-//
-//			nauty.computeCanonicalLabelling(g, lab, ptn);
-//		}
-//
-//		{
-//			SparseGraph g = new SparseGraph();
-//			SparseGraph.sgAlloc(g, 3, 2);
-//			g.nv = 3;
-//			g.nde = 2;
-//			g.d = new int[]{1, 1, 0};
-//			g.v = new int[]{0, 1, 2};
-//			g.e = new int[]{
-//				2,
-//				2
-//			};
-//
-//			int[] lab = {0,1,2};
-//			int[] ptn = {1,1,1};
-//
-//
-//			nauty.computeCanonicalLabelling(g, lab, ptn);
-//		}
-		
 		//TEST 1
 		{
 			//0 -- 1 -- 2 -- 3
