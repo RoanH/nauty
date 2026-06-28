@@ -8,6 +8,7 @@ import java.util.Arrays;
  * worktop and fmptr variables in nauty.c.
  * @author Roan
  */
+@SuppressWarnings("javadoc")
 public class Workspace{
 	private final PruneRecord[] records;
 	private final boolean[] workperm;
