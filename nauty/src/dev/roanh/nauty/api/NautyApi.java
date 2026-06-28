@@ -15,11 +15,12 @@ public class NautyApi{
 	private final Nauty nauty = new Nauty();
 	
 	//relab = labels
-	public void computeCanonicalLabelling2(SparseGraph graph, int[] labels, int[] ptn) throws InterruptedException{
-		int[] orbits = new int[graph.nv];
+	public CanonicalResult computeCanonicalLabelling(SparseGraph graph, int[] labels, int[] ptn) throws InterruptedException{
+		int[] orbits = new int[graph.nv];//TODO move
 		SparseGraph canon = new SparseGraph();
 		StatsBlk stats = new StatsBlk();
 		NauSparse.sparsenauty(nauty, graph, labels, ptn, orbits, stats, canon);
+		return new CanonicalResult(labels, canon, stats);
 	}
 	
 	/**
@@ -42,7 +43,7 @@ public class NautyApi{
 		return new SparseGraph(adj);
 	}
 	
-	public void computeCanonicalLabelling(SparseGraph graph, int[] labels, int[] ptn) throws InterruptedException{
+	public void computeCanonicalLabellingTest(SparseGraph graph, int[] labels, int[] ptn) throws InterruptedException{
 		
 		
 		
@@ -157,7 +158,7 @@ public class NautyApi{
 			int[] lab = {0,1,2,3};
 			int[] ptn = {1,1,1,1};
 
-			nauty.computeCanonicalLabelling(g, lab, ptn);
+			nauty.computeCanonicalLabellingTest(g, lab, ptn);
 		}
 
 		{
@@ -178,7 +179,7 @@ public class NautyApi{
 			int[] lab = {0,1,2,3};
 			int[] ptn = {1,1,1,1};
 
-			nauty.computeCanonicalLabelling(g, lab, ptn);
+			nauty.computeCanonicalLabellingTest(g, lab, ptn);
 		}
 		
 		//TEST 2
