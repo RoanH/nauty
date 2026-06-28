@@ -142,6 +142,7 @@ public class Nauty{
 	 */
 	private int alloc_n = 0;
 	
+	//TODO why pass orbits? its reset anyway?
 	public void nauty(SparseGraph g_arg, int[] lab, int[] ptn, int[] orbits_arg, StatsBlk stats_arg, int worksize, int n_arg, SparseGraph canong_arg) throws InterruptedException{
 		/* check for excessive sizes: */
 

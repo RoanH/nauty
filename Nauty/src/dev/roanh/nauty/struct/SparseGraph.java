@@ -33,6 +33,51 @@ public class SparseGraph{
 		nde = edges;
 	}
 	
+	/**
+	 * Constructs a new sparse graphs from the given vertex degrees
+	 * and adjacencies. Derives the vertex offsets from the degree array.
+	 * @param d The out degree of every vertex.
+	 * @param e The target vertices for every vertex, flattened in vertex order.
+	 */
+	public SparseGraph(int[] d, int[] e){
+		this.d = d;
+		this.e = e;
+		nv = d.length;
+		nde = e.length;
+		v = new int[d.length];
+		for(int i = 1; i < v.length; i++){
+			v[i] = v[i - 1] = d[i];
+		}
+	}
+	
+	/**
+	 * Constructs a new sparse graph from the given adjacency lists.
+	 * @param adj Adjacency lists with for each vertex the target vertices of edges
+	 */
+	public SparseGraph(int[][] adj){
+		nv = adj.length;
+		v = new int[nv];
+		d = new int[nv];
+		
+		for(int[] row : adj){
+			nde += row.length;
+		}
+		
+		e = new int[nde];
+		
+		int off = 0;
+		for(int i = 0; i < nv; i++){
+			int[] row = adj[i];
+			System.arraycopy(row, 0, e, off, row.length);
+			v[i] = off;
+			d[i] = row.length;
+			off += row.length;
+		}
+	}
+	
+	/**
+	 * Sorts vertex adjacency lists.
+	 */
 	public void sort(){
 		for(int i = 0; i < nv; i++){
 			int from = v[i];

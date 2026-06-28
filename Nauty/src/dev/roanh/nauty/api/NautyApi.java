@@ -22,6 +22,26 @@ public class NautyApi{
 		NauSparse.sparsenauty(nauty, graph, labels, ptn, orbits, stats, canon);
 	}
 	
+	/**
+	 * Constructs a new sparse graphs from the given vertex degrees
+	 * and adjacencies. Derives the vertex offsets from the degree array.
+	 * @param d The out degree of every vertex.
+	 * @param e The target vertices for every vertex, flattened in vertex order.
+	 * @return The constructed sparse graph.
+	 */
+	public static SparseGraph createGraph(int[] d, int[] e){
+		return new SparseGraph(d, e);
+	}
+	
+	/**
+	 * Constructs a new sparse graph from the given adjacency lists.
+	 * @param adj Adjacency lists with for each vertex the target vertices of edges
+	 * @return The constructed sparse graph.
+	 */
+	public static SparseGraph createGraph(int[][] adj){
+		return new SparseGraph(adj);
+	}
+	
 	public void computeCanonicalLabelling(SparseGraph graph, int[] labels, int[] ptn) throws InterruptedException{
 		
 		
@@ -59,27 +79,7 @@ public class NautyApi{
 	public static void main(String[] args) throws InterruptedException{
 		NautyApi nauty = new NautyApi();
 		
-//		0 - 1 - 2
-//		| \     |
-//		3 - 4 - 5
-		
-//		SparseGraph g = new SparseGraph();
-//		SparseGraph.sgAlloc(g, 6, 14);
-//		g.nv = 6;
-//		g.nde = 14;
-//		g.d = new int[]{3,2,2,2,3,2};
-//		g.v = new int[]{0,3,5,7,9,12};
-//		g.e = new int[]{
-//			1,3,4,
-//			 0,2,
-//			 1,5,
-//			 0,4,
-//			 0,3,5,
-//			 2,4
-//		};
-//
-//		int[] lab = {0,1,2,3,4,5};
-//		int[] ptn = {1,1,1,1,1,1};
+
 		
 		
 		
