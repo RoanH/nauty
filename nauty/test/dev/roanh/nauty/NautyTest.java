@@ -120,5 +120,89 @@ public class NautyTest{
 		);
 	}
 	
+	@Test
+	public void graph3Perm1() throws InterruptedException{
+		//0 -- 1 -- 2 -- 3
+		SparseGraph g = new SparseGraph(new int[][]{
+			new int[]{1},
+			new int[]{0, 2},
+			new int[]{1, 3},
+			new int[]{2}
+		});
+		
+		int[] lab = new int[]{0, 1, 2, 3};
+		int[] ptn = new int[]{1, 1, 1, 1};
+		
+		assertArrayEquals(
+			new int[]{0, 3, 2, 1},
+			nauty.computeCanonicalLabelling(g, lab, ptn).relabelling()
+		);
+	}
 	
+	@Test
+	public void graph3Perm2() throws InterruptedException{
+		//2 -- 0 -- 3 -- 1
+		SparseGraph g = new SparseGraph(new int[][]{
+			new int[]{2, 3},
+			new int[]{3},
+			new int[]{0},
+			new int[]{0, 1}
+		});
+		
+		int[] lab = new int[]{0, 1, 2, 3};
+		int[] ptn = new int[]{1, 1, 1, 1};
+		
+		assertArrayEquals(
+			new int[]{1, 2, 0, 3},
+			nauty.computeCanonicalLabelling(g, lab, ptn).relabelling()
+		);
+	}
+	
+	@Test
+	public void graph4Perm1() throws InterruptedException{
+		// 0
+		// | \
+		// 3  1
+		//  \ |
+		//   2
+		SparseGraph g = new SparseGraph(new int[][]{
+			new int[]{1, 3},
+			new int[]{0, 2},
+			new int[]{1, 3},
+			new int[]{0, 2}
+		});
+		
+		int[] lab = new int[]{0, 1, 2, 3};
+		int[] ptn = new int[]{1, 1, 1, 1};
+		
+		assertArrayEquals(
+			new int[]{0, 2, 1, 3},
+			nauty.computeCanonicalLabelling(g, lab, ptn).relabelling()
+		);
+		
+	}
+	
+	@Test
+	public void graph4Perm2() throws InterruptedException{
+		// 0
+		// | \
+		// 2  3
+		//  \ |
+		//   1
+		SparseGraph g = new SparseGraph(new int[][]{
+			new int[]{2, 3},
+			new int[]{2, 3},
+			new int[]{0, 1},
+			new int[]{0, 1}
+		});
+		
+		int[] lab = new int[]{0, 1, 2, 3};
+		int[] ptn = new int[]{1, 1, 1, 1};
+		
+		assertArrayEquals(
+			new int[]{0, 1, 2, 3},
+			nauty.computeCanonicalLabelling(g, lab, ptn).relabelling()
+		);
+		
+	}
 }
