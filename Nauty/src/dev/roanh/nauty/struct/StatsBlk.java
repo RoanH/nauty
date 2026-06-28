@@ -52,6 +52,6 @@ public class StatsBlk{
 	
 	@Override
 	public String toString(){
-		return "StatsBlk[grpsize1=" + grpsize1 + ", grpsize2=" + grpsize2 + ", numorbits=" + numorbits + ", numgenerators=" + numgenerators + ", numnodes=" + numnodes + ", numbadleaves=" + numbadleaves + ", maxlevel=" + maxlevel + ", tctotal=" + tctotal + ", canupdates=" + canupdates + ", invapplics=" + invapplics + ", invsuccesses=" + invsuccesses + ", invarsuclevel=" + invarsuclevel + "]";
+		return "StatsBlk[grpsize=" + (grpsize1 * Math.powExact(10L, grpsize2)) + ", numorbits=" + numorbits + ", numgenerators=" + numgenerators + ", numnodes=" + numnodes + ", numbadleaves=" + numbadleaves + ", maxlevel=" + maxlevel + ", tctotal=" + tctotal + ", canupdates=" + canupdates + ", invapplics=" + invapplics + ", invsuccesses=" + invsuccesses + ", invarsuclevel=" + invarsuclevel + "]";
 	}
 }

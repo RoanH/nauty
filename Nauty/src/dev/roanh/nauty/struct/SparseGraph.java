@@ -2,8 +2,6 @@ package dev.roanh.nauty.struct;
 
 import java.util.Arrays;
 
-import dev.roanh.nauty.Nauty;
-
 public class SparseGraph{
 	/**
 	 * Number of directed edges (loops contribute only 1).
@@ -43,8 +41,16 @@ public class SparseGraph{
 	}
 	
 	public static void sgAlloc(SparseGraph sg, int nlen, int ndelen){
-		sg.v = Nauty.dynAlloc1(sg.v, nlen);
-		sg.d = Nauty.dynAlloc1(sg.d, nlen);
-		sg.e = Nauty.dynAlloc1(sg.e, ndelen);
+		if(sg.v == null || sg.v.length < nlen){
+			sg.v = new int[nlen];
+		}
+		
+		if(sg.d == null || sg.d.length < nlen){
+			sg.d = new int[nlen];
+		}
+		
+		if(sg.e == null || sg.e.length < ndelen){
+			sg.e = new int[ndelen];
+		}
 	}
 }

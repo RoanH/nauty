@@ -20,55 +20,102 @@ public class Nauty{
 	 * Utilities with matching worksize.
 	 */
 	private final NaUtil naUtil = new NaUtil();
-	
-	//TODO fix the copies below to final constants equal to the sparse options and clear some branches
-	/* copies of some of the options: */
-	/* make canong and canonlab? */
-	final boolean getcanon = true;
-	/* multiple edges or loops? */
-	final boolean digraph = true;
-	/* max level for smart target cell choosing */
+	//==================== OPTIONS ====================
+	/**
+	 * make canong and canonlab?
+	 * Fixed to true for now.
+	 */
+	private final boolean getcanon = true;
+	/**
+	 * multiple edges or loops?
+	 * Fixed to true for now.
+	 */
+	private final boolean digraph = true;
+	/**
+	 * max level for smart target cell choosing
+	 */
 	private int tc_level;
-	/* min level for invariant computation */
-	private int mininvarlevel = 0;
-	/* max level for invariant computation */
-	private int maxinvarlevel = 999;
-	
-	/* local versions of some of the arguments: */
-	int n;//input n
-	SparseGraph g,canong;
-	int[] orbits;
-	StatsBlk stats;
-	
-	/* temporary versions of some stats: */
-	long invapplics,invsuccesses;
-	int invarsuclevel;
-	
- /* working variables: <the "bsf leaf" is the leaf which is best guess so
-                            far at the canonical leaf>  */
-int gca_first, /* level of greatest common ancestor of
-                                  current node and first leaf */
-    gca_canon,     /* ditto for current node and bsf leaf */
-    noncheaplevel, /* level of greatest ancestor for which cheapautom==FALSE */
-    allsamelevel,  /* level of least ancestor of first leaf for
-                      which all descendant leaves are known to be
-                      equivalent */
-    eqlev_first,   /* level to which codes for this node match those
-                      for first leaf */
-    eqlev_canon,   /* level to which codes for this node match those
-                      for the bsf leaf. */
-    comp_canon,    /* -1,0,1 according as code at eqlev_canon+1 is
-                       <,==,> that for bsf leaf.  Also used for
-                       similar purpose during leaf processing */
-    samerows,      /* number of rows of canong which are correct for
-                      the bsf leaf  BDM:correct description? */
-    canonlevel,    /* level of bsf leaf */
-    stabvertex,    /* point fixed in ancestor of first leaf at level
-                      gca_canon */
-    cosetindex;    /* the point being fixed at level gca_first */
-
-	boolean needshortprune;  /* used to flag calls to shortprune */
-	
+	/**
+	 * min level for invariant computation
+	 */
+	private int mininvarlevel;
+	/**
+	 * max level for invariant computation
+	 */
+	private int maxinvarlevel;
+	//====================  INPUT  ====================
+	/**
+	 * Number of vertices in the input graph.
+	 */
+	private int n;
+	/**
+	 * The input graph.
+	 */
+	private SparseGraph g;
+	/**
+	 * The output canonical graph.
+	 */
+	private SparseGraph canong;
+	/**
+	 * Input orbits.
+	 */
+	private int[] orbits;
+	/**
+	 * Output stats.
+	 */
+	private StatsBlk stats;
+	//=================== TEMP STAT ===================
+	private long invapplics;
+	private int invsuccesses;
+	private int invarsuclevel;
+	//==================== WORKVAR ====================
+	//the "bsf leaf" is the leaf which is best guess so far at the canonical leaf
+	/**
+	 *  level of greatest common ancestor of current node and first leaf
+	 */
+	private int gca_first;
+	/**
+	 * ditto for current node and bsf leaf
+	 */
+	private int gca_canon;
+	/**
+	 * level of greatest ancestor for which cheapautom==FALSE
+	 */
+	private int noncheaplevel;
+	/**
+	 * level of least ancestor of first leaf for which all descendant leaves are known to be equivalent
+	 */
+	private int allsamelevel;
+	/**
+	 * level to which codes for this node match those for first leaf
+	 */
+	private int eqlev_first;
+	/**
+	 * level to which codes for this node match those for the bsf leaf.
+	 */
+	private int eqlev_canon;
+	/**
+	 * -1,0,1 according as code at eqlev_canon+1 is <,==,> that for bsf leaf.
+	 * Also used for similar purpose during leaf processing
+	 */
+	private int comp_canon;
+	/**
+	 * number of rows of canong which are correct for the bsf leaf  BDM:correct description?
+	 */
+	private int samerows;
+	/**
+	 * level of bsf leaf
+	 */
+	private int canonlevel;
+	/**
+	 * the point being fixed at level gca_first
+	 */
+	private int cosetindex;
+	/**
+	 * used to flag calls to shortprune
+	 */
+	private boolean needshortprune;
+	//==================== WORKMEM ====================
 	private NSet fixedpts;
 	private NSet active;
 	private int[] workperm;
@@ -77,31 +124,32 @@ int gca_first, /* level of greatest common ancestor of
 	private int[] firsttc;
 	private int[] firstcode;
 	private int[] canoncode;
-	
 	private Workspace workspace;
-	
-	/* In the dynamically allocated case (MAXN=0), each level of recursion
-	   needs one set (tcell) to represent the target cell.  This is
-	   implemented by using a linked list of tcnode anchored at the root
-	   of the search tree.  Each node points to its child (if any) and to
-	   the dynamically allocated tcell.  Apart from the first node of
-	   the list, each node always has a tcell good for m up to alloc_m.
-	   tcnodes and tcells are kept between calls to nauty, except that
-	   they are freed and reallocated if m gets bigger than alloc_m.  */
+	/**
+	 * In the dynamically allocated case (MAXN=0), each level of recursion
+	 * needs one set (tcell) to represent the target cell.  This is
+	 * implemented by using a linked list of tcnode anchored at the root
+	 * of the search tree.  Each node points to its child (if any) and to
+	 * the dynamically allocated tcell.  Apart from the first node of
+	 * the list, each node always has a tcell good for m up to alloc_m.
+	 * tcnodes and tcells are kept between calls to nauty, except that
+	 * they are freed and reallocated if m gets bigger than alloc_m.
+	 */
 	private TCNode tcnode0 = new TCNode();
-	private int alloc_n = -1;// 'n' allocated capacity
+	/**
+	 * Currently allocated capacity for 'n', all work structures are large
+	 * enough to work with input graphs that contain at most n vertices.
+	 */
+	private int alloc_n = 0;
 	
 	public void nauty(SparseGraph g_arg, int[] lab, int[] ptn, int[] orbits_arg, StatsBlk stats_arg, int worksize, int n_arg, SparseGraph canong_arg) throws InterruptedException{
-		final IntPtr numcells = new IntPtr();
-
 		/* check for excessive sizes: */
 
 		if(n_arg > NAUTY_INFINITY - 2){
 			throw new IllegalArgumentException("nauty: need n <= %d, but n=%d".formatted(NAUTY_INFINITY - 2, n_arg));
 		}
 
-		if(n_arg == 0) /* Special code for zero-sized graph */
-		{
+		if(n_arg == 0){ /* Special code for zero-sized graph */
 			stats_arg.grpsize1 = 1.0;
 			stats_arg.grpsize2 = 0;
 			stats_arg.numorbits = 0;
@@ -134,7 +182,7 @@ int gca_first, /* level of greatest common ancestor of
 		/* initialize everything: */
 
 		ptn[n - 1] = 0;
-		numcells.val = 0;
+		IntPtr numcells = new IntPtr();
 		for(int i = 0; i < n; ++i){
 			if(ptn[i] != 0){
 				ptn[i] = NAUTY_INFINITY;
@@ -199,9 +247,9 @@ int gca_first, /* level of greatest common ancestor of
 	
 	private void prepare(int n){
 		this.n = n;
+		nauSparse.prepare(n);
+		naUtil.prepare(n);
 		if(n > alloc_n){
-			nauSparse.prepare(n);
-			naUtil.prepare(n);
 			fixedpts = new NSet(n);
 			active = new NSet(n);
 			workperm = new int[n];
@@ -302,7 +350,6 @@ int gca_first, /* level of greatest common ancestor of
 				if(tv == tv1){
 					rtnlevel = firstpathnode0(lab, ptn, level + 1, numcells.incNew(), tcnode_this);
 					gca_first = level;
-					stabvertex = tv1;
 				}else{
 					rtnlevel = othernode0(lab, ptn, level + 1, numcells.incNew(), tcnode_this);
 				}
@@ -651,22 +698,6 @@ int gca_first, /* level of greatest common ancestor of
 				comp_canon = 0;
 			}
 		}
-	}
-	
-	@Deprecated
-	public static int[] dynAllStat(){
-		//effectively just a flag, but it keeps things more consistent with nauty
-		return new int[0];
-	}
-	
-	@Deprecated
-	public static int[] dynAlloc1(int[] name, int sz){
-		//JVM handles memory, so just make sure we are large enough
-		if(name == null || sz > name.length){
-			name = new int[sz];
-		}
-		
-		return name;
 	}
 	
 	//original macro depends on reference passing

@@ -11,10 +11,6 @@ public class NSet{
 		set = new BitSet(n);
 	}
 	
-	public int getCapacity(){
-		return set.size();
-	}
-
 	public int nextelement(int pos){
 		//nauty spec: greater than pos
 		//java spec: on or after
