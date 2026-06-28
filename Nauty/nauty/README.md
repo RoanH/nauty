@@ -1,0 +1,2 @@
+# Nauty
+This folder contains an unaltered subset of the original C source files for reference from [nauty & Traces](https://pallini.di.uniroma1.it/) release version 2.8.6, released on the 16th of November 2022 under the [Apache License v2.0](https://www.apache.org/licenses/LICENSE-2.0).
