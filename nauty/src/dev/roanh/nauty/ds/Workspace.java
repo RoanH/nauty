@@ -98,12 +98,12 @@ public class Workspace{
 	 * GLOBALS ACCESSED: {@code bit<r>}
 	 */
 	public void fmptn(int[] lab, int[] ptn, int level, int n){
-		PruneRecord record = nextRecord();
-		record.clear();
+		PruneRecord rec = nextRecord();
+		rec.clear();
 
 		for(int i = 0; i < n; ++i){
 			if(ptn[i] <= level){
-				record.addElement(lab[i]);
+				rec.addElement(lab[i]);
 			}else{
 				int lmin = lab[i];
 				do{
@@ -111,7 +111,7 @@ public class Workspace{
 						lmin = lab[i];
 					}
 				}while(ptn[i] > level);
-				record.mcr().addElement(lmin);
+				rec.mcr().addElement(lmin);
 			}
 		}
 	}

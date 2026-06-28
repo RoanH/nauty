@@ -58,10 +58,6 @@ public class Nauty{
 	 */
 	private SparseGraph canong;
 	/**
-	 * Input orbits.
-	 */
-	private int[] orbits;
-	/**
 	 * Output stats.
 	 */
 	private StatsBlk stats;
@@ -119,6 +115,7 @@ public class Nauty{
 	//==================== WORKMEM ====================
 	private NSet fixedpts;
 	private NSet active;
+	private int[] orbits;
 	private int[] workperm;
 	private int[] firstlab;
 	private int[] canonlab;
@@ -144,7 +141,7 @@ public class Nauty{
 	private int alloc_n = 0;
 	
 	//TODO why pass orbits? its reset anyway?
-	public void nauty(SparseGraph g_arg, int[] lab, int[] ptn, int[] orbits_arg, StatsBlk stats_arg, int worksize, int n_arg, SparseGraph canong_arg) throws InterruptedException{
+	public void nauty(SparseGraph g_arg, int[] lab, int[] ptn, StatsBlk stats_arg, int worksize, int n_arg, SparseGraph canong_arg) throws InterruptedException{
 		/* check for excessive sizes: */
 
 		if(n_arg > NAUTY_INFINITY - 2){
@@ -174,7 +171,6 @@ public class Nauty{
 		prepare(n_arg);
 
 		/* OLD g = g_arg; */
-		orbits = orbits_arg;
 		stats = stats_arg;
 
 		tc_level = digraph ? 0 : 100;
@@ -254,6 +250,7 @@ public class Nauty{
 		if(n > alloc_n){
 			fixedpts = new NSet(n);
 			active = new NSet(n);
+			orbits = new int[n];
 			workperm = new int[n];
 			firstlab = new int[n];
 			canonlab = new int[n];

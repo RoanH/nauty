@@ -19,8 +19,8 @@ public class NauSparse{
 	private int[] work4;
 	private int n;
 
-	public static void sparsenauty(Nauty nauty, SparseGraph g, int[] lab, int[] ptn, int[] orbits, StatsBlk stats, SparseGraph h) throws InterruptedException{
-		nauty.nauty(g, lab, ptn, orbits, stats, DEFAULT_WORKSIZE, g.nv, h);
+	public static void sparsenauty(Nauty nauty, SparseGraph g, int[] lab, int[] ptn, StatsBlk stats, SparseGraph h) throws InterruptedException{
+		nauty.nauty(g, lab, ptn, stats, DEFAULT_WORKSIZE, g.nv, h);
 	}
 	
 	public void prepare(int n){

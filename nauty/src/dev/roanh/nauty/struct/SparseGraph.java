@@ -1,5 +1,6 @@
 package dev.roanh.nauty.struct;
 
+import java.io.PrintStream;
 import java.util.Arrays;
 
 public class SparseGraph{
@@ -82,6 +83,16 @@ public class SparseGraph{
 		for(int i = 0; i < nv; i++){
 			int from = v[i];
 			Arrays.sort(e, from, from + d[i]);
+		}
+	}
+	
+	public void print(PrintStream out){
+		for(int i = 0; i < nv; i++){
+			out.print(i + " : " );
+			for(int ei = 0; ei < d[i]; ei++){
+				out.print(e[v[i] + ei] + " ");
+			}
+			out.println();
 		}
 	}
 	
