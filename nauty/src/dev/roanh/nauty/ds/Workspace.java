@@ -69,12 +69,12 @@ public class Workspace{
 		int i, k, l;
 
 		Arrays.fill(workperm, 0, n, false);
-		PruneRecord record = nextRecord();
-		record.clear();
+		PruneRecord rec = nextRecord();
+		rec.clear();
 
 		for(i = 0; i < n; ++i){
 			if(perm[i] == i){
-				record.addElement(i);
+				rec.addElement(i);
 			}else if(!workperm[i]){
 				l = i;
 				do{
@@ -83,7 +83,7 @@ public class Workspace{
 					workperm[k] = true;
 				}while(l != i);
 
-				record.mcr().addElement(i);
+				rec.mcr().addElement(i);
 			}
 		}
 	}
