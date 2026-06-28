@@ -11,7 +11,6 @@ public class NSet{
 		set = new BitSet(n);
 	}
 
-	//word size is irrelevant dropped as input
 	public int nextelement(int pos){
 		//nauty spec: greater than pos
 		//java spec: on or after

@@ -94,7 +94,7 @@ int gca_first, /* level of greatest common ancestor of
 	TCNode tcnode0 = new TCNode();
 	int alloc_n = 0;
 	
-	void nauty(SparseGraph g_arg, int[] lab, int[] ptn, int[] orbits_arg, StatsBlk stats_arg, int worksize, int n_arg, SparseGraph canong_arg) throws InterruptedException{
+	public void nauty(SparseGraph g_arg, int[] lab, int[] ptn, int[] orbits_arg, StatsBlk stats_arg, int worksize, int n_arg, SparseGraph canong_arg) throws InterruptedException{
 		int i;
 		final IntPtr numcells = new IntPtr();
 
@@ -127,6 +127,8 @@ int gca_first, /* level of greatest common ancestor of
 		/* take copies of some args, and options: */
 		n = n_arg;
 
+		nauSparse.prepare(n);
+		naUtil.prepare(n);
 		fixedpts = new NSet(n);
 		active = new NSet(n);
 		workperm = dynAlloc1(workperm, n);
@@ -204,7 +206,7 @@ int gca_first, /* level of greatest common ancestor of
 		firstpathnode0(lab, ptn, 1, numcells, tcnode0);
 
 		if(getcanon){
-			nauSparse.updatecan_sg(g, canong, canonlab, samerows, n);
+			nauSparse.updatecan_sg(g, canong, canonlab, samerows);
 			for(i = 0; i < n; ++i){
 				lab[i] = canonlab[i];
 			}
@@ -230,10 +232,9 @@ int gca_first, /* level of greatest common ancestor of
 	 *                   firstpathnode(),othernode(),recover(),writestats(),
 	 *                   (*userlevelproc)(),(*tcellproc)(),shortprune()
 	 */
-	int firstpathnode0(int[] lab, int[] ptn, int level, IntPtr numcells, TCNode tcnode_parent) throws InterruptedException{
+	private int firstpathnode0(int[] lab, int[] ptn, int level, IntPtr numcells, TCNode tcnode_parent) throws InterruptedException{
 		int tv;
 		int tv1, index, rtnlevel;
-		int childcount = 0;
 		IntPtr tcellsize = new IntPtr();
 		IntPtr tc = new IntPtr();
 		IntPtr qinvar = new IntPtr();
@@ -252,7 +253,7 @@ int gca_first, /* level of greatest common ancestor of
 		++stats.numnodes;
 
 		/* refine partition : */
-		naUtil.doref(g, lab, ptn, level, numcells, qinvar, workperm, active, refcode, nauSparse, mininvarlevel, maxinvarlevel, /*invararg,digraph,M,*/n);
+		naUtil.doref(g, lab, ptn, level, numcells, qinvar, workperm, active, refcode, nauSparse, mininvarlevel, maxinvarlevel);
 		firstcode[level] = (short)refcode.val;
 		if(qinvar.val > 0){
 			++invapplics;
@@ -274,7 +275,7 @@ int gca_first, /* level of greatest common ancestor of
 		if(numcells.val != n){
 			/* locate new target cell, setting tc to its position in lab, tcell
 			              to its contents, and tcellsize to its size: */
-			naUtil.maketargetcell(g, lab, ptn, level, tcell, tcellsize, tc, tc_level, -1, nauSparse, n);
+			naUtil.maketargetcell(g, lab, ptn, level, tcell, tcellsize, tc, tc_level, -1, nauSparse);
 			stats.tctotal += tcellsize.val;
 		}
 		firsttc[level] = tc.val;
@@ -288,7 +289,7 @@ int gca_first, /* level of greatest common ancestor of
 			throw new InterruptedException();
 		}
 
-		if(noncheaplevel >= level && !nauSparse.cheapautom_sg(ptn, level, digraph, n)){
+		if(noncheaplevel >= level && !nauSparse.cheapautom_sg(ptn, level, digraph)){
 			noncheaplevel = level + 1;
 		}
 
@@ -301,12 +302,10 @@ int gca_first, /* level of greatest common ancestor of
 				cosetindex = tv;
 				if(tv == tv1){
 					rtnlevel = firstpathnode0(lab, ptn, level + 1, numcells.incNew(), tcnode_this);
-					childcount = 1;
 					gca_first = level;
 					stabvertex = tv1;
 				}else{
 					rtnlevel = othernode0(lab, ptn, level + 1, numcells.incNew(), tcnode_this);
-					++childcount;
 				}
 				fixedpts.delElement(tv);
 				if(rtnlevel < level){
@@ -341,7 +340,7 @@ int gca_first, /* level of greatest common ancestor of
 	 *                    processnode(),cheapautom(),(*tcellproc)(),shortprune(),
 	 *                   nextelement(),breakout(),othernode(),longprune()
 	 */
-	int othernode0(int[] lab, int[] ptn, int level, IntPtr numcells, TCNode tcnode_parent) throws InterruptedException{
+	private int othernode0(int[] lab, int[] ptn, int level, IntPtr numcells, TCNode tcnode_parent) throws InterruptedException{
 		int tv;
 		int tv1, rtnlevel;
 		IntPtr tcellsize = new IntPtr();
@@ -367,7 +366,7 @@ int gca_first, /* level of greatest common ancestor of
 		++stats.numnodes;
 
 		/* refine partition : */
-		naUtil.doref(g, lab, ptn, level, numcells, qinvar, workperm, active, refcode, nauSparse, mininvarlevel, maxinvarlevel, n);
+		naUtil.doref(g, lab, ptn, level, numcells, qinvar, workperm, active, refcode, nauSparse, mininvarlevel, maxinvarlevel);
 		code = (short)refcode.val;
 		if(qinvar.val > 0){
 			++invapplics;
@@ -404,12 +403,12 @@ int gca_first, /* level of greatest common ancestor of
 
 		if(numcells.val < n && (eqlev_first == level || (getcanon && comp_canon >= 0))){
 			if(!getcanon || comp_canon < 0){
-				naUtil.maketargetcell(g, lab, ptn, level, tcell, tcellsize, tc, tc_level, firsttc[level], nauSparse, n);
+				naUtil.maketargetcell(g, lab, ptn, level, tcell, tcellsize, tc, tc_level, firsttc[level], nauSparse);
 				if(tc.val != firsttc[level]){
 					eqlev_first = level - 1;
 				}
 			}else{
-				naUtil.maketargetcell(g, lab, ptn, level, tcell, tcellsize, tc, tc_level, -1, nauSparse, n);
+				naUtil.maketargetcell(g, lab, ptn, level, tcell, tcellsize, tc, tc_level, -1, nauSparse);
 			}
 			stats.tctotal += tcellsize.val;
 		}
@@ -425,7 +424,7 @@ int gca_first, /* level of greatest common ancestor of
 			workspace.shortprune(tcell);
 		}
 
-		if(!nauSparse.cheapautom_sg(ptn, level, digraph, n)){
+		if(!nauSparse.cheapautom_sg(ptn, level, digraph)){
 			noncheaplevel = level + 1;
 		}
 
@@ -459,15 +458,13 @@ int gca_first, /* level of greatest common ancestor of
 	 * 
 	 * FUNCTIONS CALLED: NONE
 	 */
-	void firstterminal(int[] lab, int level){
-		int i;
-
+	private void firstterminal(int[] lab, int level){
 		stats.maxlevel = level;
 		gca_first = allsamelevel = eqlev_first = level;
 		firstcode[level + 1] = 077777;
 		firsttc[level + 1] = -1;
 
-		for(i = 0; i < n; ++i){
+		for(int i = 0; i < n; ++i){
 			firstlab[i] = lab[i];
 		}
 
@@ -475,10 +472,10 @@ int gca_first, /* level of greatest common ancestor of
 			canonlevel = eqlev_canon = gca_canon = level;
 			comp_canon = 0;
 			samerows = 0;
-			for(i = 0; i < n; ++i){
+			for(int i = 0; i < n; ++i){
 				canonlab[i] = lab[i];
 			}
-			for(i = 0; i <= level; ++i){
+			for(int i = 0; i <= level; ++i){
 				canoncode[i] = firstcode[i];
 			}
 			canoncode[level + 1] = 077777;
@@ -515,21 +512,21 @@ int gca_first, /* level of greatest common ancestor of
 	 *                      writeperm(),(*userautomproc)(),orbjoin(),
 	 *                      shortprune(),fmptn()
 	 */
-	int processnode(int[] lab, int[] ptn, int level, int numcells){
-		int i, code, save, newlevel;
+	private int processnode(int[] lab, int[] ptn, int level, int numcells){
+		int save, newlevel;
 		boolean ispruneok;
 		IntPtr sr = new IntPtr();
 
-		code = 0;
+		int code = 0;
 		if(eqlev_first != level && (!getcanon || comp_canon < 0)){
 			code = 4;
 		}else if(numcells == n){
 			if(eqlev_first == level){
-				for(i = 0; i < n; ++i){
+				for(int i = 0; i < n; ++i){
 					workperm[firstlab[i]] = lab[i];
 				}
 
-				if(gca_first >= noncheaplevel || nauSparse.isautom_sg(g, workperm, digraph, n)){
+				if(gca_first >= noncheaplevel || nauSparse.isautom_sg(g, workperm, digraph)){
 					code = 1;
 				}
 			}
@@ -540,13 +537,13 @@ int gca_first, /* level of greatest common ancestor of
 						if(level < canonlevel){
 							comp_canon = 1;
 						}else{
-							nauSparse.updatecan_sg(g, canong, canonlab, samerows, n);
+							nauSparse.updatecan_sg(g, canong, canonlab, samerows);
 							samerows = n;
-							comp_canon = nauSparse.testcanlab_sg(g, canong, lab, sr, n);
+							comp_canon = nauSparse.testcanlab_sg(g, canong, lab, sr);
 						}
 					}
 					if(comp_canon == 0){
-						for(i = 0; i < n; ++i){
+						for(int i = 0; i < n; ++i){
 							workperm[canonlab[i]] = lab[i];
 						}
 						code = 2;
@@ -571,14 +568,14 @@ int gca_first, /* level of greatest common ancestor of
 
 		case 1: /* lab is equivalent to firstlab */
 			workspace.fmperm(workperm, n);
-			stats.numorbits = naUtil.orbjoin(orbits, workperm, n);
+			stats.numorbits = naUtil.orbjoin(orbits, workperm);
 			++stats.numgenerators;
 			return gca_first;
 
 		case 2: /* lab is equivalent to canonlab */
 			workspace.fmperm(workperm, n);
 			save = stats.numorbits;
-			stats.numorbits = naUtil.orbjoin(orbits, workperm, n);
+			stats.numorbits = naUtil.orbjoin(orbits, workperm);
 			if(stats.numorbits == save){
 				if(gca_canon != gca_first){
 					needshortprune = true;
@@ -596,7 +593,7 @@ int gca_first, /* level of greatest common ancestor of
 
 		case 3: /* lab is better than canonlab */
 			++stats.canupdates;
-			for(i = 0; i < n; ++i){
+			for(int i = 0; i < n; ++i){
 				canonlab[i] = lab[i];
 			}
 			canonlevel = eqlev_canon = gca_canon = level;
@@ -633,10 +630,8 @@ int gca_first, /* level of greatest common ancestor of
 	 * 
 	 * FUNCTIONS CALLED: NONE
 	 */
-	void recover(int[] ptn, int level){
-		int i;
-
-		for(i = 0; i < n; ++i){
+	private void recover(int[] ptn, int level){
+		for(int i = 0; i < n; ++i){
 			if(ptn[i] > level){
 				ptn[i] = NAUTY_INFINITY;
 			}
@@ -659,11 +654,13 @@ int gca_first, /* level of greatest common ancestor of
 		}
 	}
 	
+	@Deprecated
 	public static int[] dynAllStat(){
 		//effectively just a flag, but it keeps things more consistent with nauty
 		return new int[0];
 	}
 	
+	@Deprecated
 	public static int[] dynAlloc1(int[] name, int sz){
 		//JVM handles memory, so just make sure we are large enough
 		if(name == null || sz > name.length){
@@ -674,7 +671,7 @@ int gca_first, /* level of greatest common ancestor of
 	}
 	
 	//original macro depends on reference passing
-	public static void multiply(StatsBlk stats, int index){
+	private static void multiply(StatsBlk stats, int index){
 		if((stats.grpsize1 *= index) >= 1e10){
 			stats.grpsize1 /= 1e10;
 			stats.grpsize2 += 10;

@@ -2,8 +2,6 @@ package dev.roanh.nauty.ds;
 
 import java.util.Arrays;
 
-import dev.roanh.nauty.Nauty;
-
 /**
  * Java arrays start zero'ed, so no need to force a reset,
  * all of the performance tricks used in C here are redundant
@@ -12,7 +10,7 @@ import dev.roanh.nauty.Nauty;
  * @author Roan
  */
 public class MarkVal{
-	private int[] marks = Nauty.dynAllStat();
+	private int[] marks;
 	private int markVal = 1;
 	
 	public void mark(int i){
@@ -44,6 +42,9 @@ public class MarkVal{
 	 * the next RESETMARKS command will work correctly
 	 */
 	public void prepare(int nn){
-		marks = Nauty.dynAlloc1(marks, nn);
+		if(marks == null || nn > marks.length){
+			marks = new int[nn];
+			markVal = 1;
+		}
 	}
 }

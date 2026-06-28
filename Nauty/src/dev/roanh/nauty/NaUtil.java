@@ -5,7 +5,16 @@ import dev.roanh.nauty.ds.NSet;
 import dev.roanh.nauty.struct.SparseGraph;
 
 public class NaUtil{
-	private int[] workperm = Nauty.dynAllStat();
+	private int[] workperm;
+	private int n;
+	
+	public void prepare(int n){
+		//n has to reflect the actual n for the input, but work arrays are allowed to be over sized
+		this.n = n;
+		if(workperm == null || workperm.length < n){
+			workperm = new int[n];
+		}
+	}
 	
 	/**
 	 * orbits represents a partition of {0,1,...,n-1}, by orbits[i] = the
@@ -16,7 +25,7 @@ public class NaUtil{
 	 * 
 	 * GLOBALS ACCESSED: NONE
 	 */
-	int orbjoin(int[] orbits, int[] map, int n){
+	public int orbjoin(int[] orbits, int[] map){
 		int i, j1, j2;
 
 		for(i = 0; i < n; ++i){
@@ -83,8 +92,7 @@ public class NaUtil{
 			IntPtr code,
 			NauSparse nauSparse,
 		    int mininvarlev,
-		    int maxinvarlev,
-		    int n
+		    int maxinvarlev
 	    ){
 		
 		int pw;
@@ -92,14 +100,12 @@ public class NaUtil{
 		long longcode;
 		boolean same;
 
-		workperm = Nauty.dynAlloc1(workperm, n);
-
-		nauSparse.refine_sg(g, lab, ptn, level, numcells, active, code, n);
+		nauSparse.refine_sg(g, lab, ptn, level, numcells, active, code);
 
 		minlev = (mininvarlev < 0 ? -mininvarlev : mininvarlev);
 		maxlev = (maxinvarlev < 0 ? -maxinvarlev : maxinvarlev);
 		if(numcells.val < n && level >= minlev && level <= maxlev){
-			nauSparse.adjacencies_sg(g, lab, ptn, level, invar, n);
+			nauSparse.adjacencies_sg(g, lab, ptn, level, invar);
 			active.clear();
 			for(i = n; --i >= 0;){
 				workperm[i] = invar[lab[i]];
@@ -132,7 +138,7 @@ public class NaUtil{
 			if(numcells.val > nc){
 				qinvar.val = 2;
 				longcode = code.val;
-				nauSparse.refine_sg(g, lab, ptn, level, numcells, active, code, n);
+				nauSparse.refine_sg(g, lab, ptn, level, numcells, active, code);
 				longcode = mash(longcode, code.val);
 				code.val = cleanup(longcode);
 			}else{
@@ -167,12 +173,11 @@ public class NaUtil{
 			IntPtr cellpos,
 			int tc_level,
 			int hint,
-			NauSparse nauSparse,
-		    int n
+			NauSparse nauSparse
 	    ){
 		int i, j, k;
 
-		i = nauSparse.targetcell_sg(g, lab, ptn, level, tc_level, hint, n);
+		i = nauSparse.targetcell_sg(g, lab, ptn, level, tc_level, hint);
 		for(j = i + 1; ptn[j] > level; ++j){
 		}
 
@@ -195,7 +200,7 @@ public class NaUtil{
 	 * 
 	 * GLOBALS ACCESSED: bit<r>
 	 */
-	public void breakout(int[] lab, int[] ptn, int level, int tc, int tv, NSet active/*, int m*/){
+	public void breakout(int[] lab, int[] ptn, int level, int tc, int tv, NSet active){
 		int i, prev, next;
 
 		active.clear();
