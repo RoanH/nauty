@@ -16,6 +16,9 @@ public class Nauty{
 	 * We only support sparse nauty the dispatch vector and invar procedure are hard wired.
 	 */
 	private final NauSparse nauSparse = new NauSparse();
+	/**
+	 * Utilities with matching worksize.
+	 */
 	private final NaUtil naUtil = new NaUtil();
 	
 	//TODO fix the copies below to final constants equal to the sparse options and clear some branches
@@ -24,12 +27,6 @@ public class Nauty{
 	final boolean getcanon = true;
 	/* multiple edges or loops? */
 	final boolean digraph = true;
-	/* write automorphisms? */
-	final boolean writeautoms = false;
-	/* write stats on pts fixed, etc.? */
-	final boolean domarkers = false;
-	/* use cartesian rep for writing automs? */
-	final boolean cartesian = false;
 	/* max level for smart target cell choosing */
 	private int tc_level;
 	/* min level for invariant computation */
@@ -38,7 +35,7 @@ public class Nauty{
 	private int maxinvarlevel = 999;
 	
 	/* local versions of some of the arguments: */
-	int n;
+	int n;//input n
 	SparseGraph g,canong;
 	int[] orbits;
 	StatsBlk stats;
@@ -72,14 +69,14 @@ int gca_first, /* level of greatest common ancestor of
 
 	boolean needshortprune;  /* used to flag calls to shortprune */
 	
-	private NSet fixedpts = null;
-	private NSet active = null;
-	int[] workperm = dynAllStat();
-	int[] firstlab = dynAllStat();
-	int[] canonlab = dynAllStat();
-	int[] firsttc = dynAllStat();
-	int[] firstcode = dynAllStat();
-	int[] canoncode = dynAllStat();
+	private NSet fixedpts;
+	private NSet active;
+	private int[] workperm;
+	private int[] firstlab;
+	private int[] canonlab;
+	private int[] firsttc;
+	private int[] firstcode;
+	private int[] canoncode;
 	
 	private Workspace workspace;
 	
@@ -91,11 +88,10 @@ int gca_first, /* level of greatest common ancestor of
 	   the list, each node always has a tcell good for m up to alloc_m.
 	   tcnodes and tcells are kept between calls to nauty, except that
 	   they are freed and reallocated if m gets bigger than alloc_m.  */
-	TCNode tcnode0 = new TCNode();
-	int alloc_n = 0;
+	private TCNode tcnode0 = new TCNode();
+	private int alloc_n = -1;// 'n' allocated capacity
 	
 	public void nauty(SparseGraph g_arg, int[] lab, int[] ptn, int[] orbits_arg, StatsBlk stats_arg, int worksize, int n_arg, SparseGraph canong_arg) throws InterruptedException{
-		int i;
 		final IntPtr numcells = new IntPtr();
 
 		/* check for excessive sizes: */
@@ -125,22 +121,7 @@ int gca_first, /* level of greatest common ancestor of
 		}
 
 		/* take copies of some args, and options: */
-		n = n_arg;
-
-		nauSparse.prepare(n);
-		naUtil.prepare(n);
-		fixedpts = new NSet(n);
-		active = new NSet(n);
-		workperm = dynAlloc1(workperm, n);
-		firstlab = dynAlloc1(firstlab, n);
-		canonlab = dynAlloc1(canonlab, n);
-		firstcode = dynAlloc1(firstcode, n + 2);
-		canoncode = dynAlloc1(canoncode, n + 2);
-		firsttc = dynAlloc1(firsttc, n + 2);
-		if(n > alloc_n){
-			alloc_n = n;
-			tcnode0.next = null;
-		}
+		prepare(n_arg);
 
 		/* OLD g = g_arg; */
 		orbits = orbits_arg;
@@ -154,7 +135,7 @@ int gca_first, /* level of greatest common ancestor of
 
 		ptn[n - 1] = 0;
 		numcells.val = 0;
-		for(i = 0; i < n; ++i){
+		for(int i = 0; i < n; ++i){
 			if(ptn[i] != 0){
 				ptn[i] = NAUTY_INFINITY;
 			}else{
@@ -163,7 +144,7 @@ int gca_first, /* level of greatest common ancestor of
 		}
 
 		active.clear();
-		for(i = 0; i < n; ++i){
+		for(int i = 0; i < n; ++i){
 			active.addElement(i);
 			while(ptn[i] != 0){
 				++i;
@@ -178,7 +159,7 @@ int gca_first, /* level of greatest common ancestor of
 		g = g_arg;
 		canong = canong_arg;
 
-		for(i = 0; i < n; ++i){
+		for(int i = 0; i < n; ++i){
 			orbits[i] = i;
 		}
 		stats.grpsize1 = 1.0;
@@ -207,13 +188,31 @@ int gca_first, /* level of greatest common ancestor of
 
 		if(getcanon){
 			nauSparse.updatecan_sg(g, canong, canonlab, samerows);
-			for(i = 0; i < n; ++i){
+			for(int i = 0; i < n; ++i){
 				lab[i] = canonlab[i];
 			}
 		}
 		stats.invarsuclevel = (invarsuclevel == NAUTY_INFINITY ? 0 : invarsuclevel);
 		stats.invapplics = invapplics;
 		stats.invsuccesses = invsuccesses;
+	}
+	
+	private void prepare(int n){
+		this.n = n;
+		if(n > alloc_n){
+			nauSparse.prepare(n);
+			naUtil.prepare(n);
+			fixedpts = new NSet(n);
+			active = new NSet(n);
+			workperm = new int[n];
+			firstlab = new int[n];
+			canonlab = new int[n];
+			firstcode = new int[n + 2];
+			canoncode = new int[n + 2];
+			firsttc = new int[n + 2];
+			tcnode0.next = null;
+			alloc_n = n;
+		}
 	}
 	
 	/**

@@ -10,6 +10,10 @@ public class NSet{
 	public NSet(int n){
 		set = new BitSet(n);
 	}
+	
+	public int getCapacity(){
+		return set.size();
+	}
 
 	public int nextelement(int pos){
 		//nauty spec: greater than pos
