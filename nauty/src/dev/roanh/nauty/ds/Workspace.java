@@ -63,7 +63,7 @@ public class Workspace{
 	 * contains those points are fixed by perm, while mcr contains the set of
 	 * those points which are least in their orbits.
 	 * 
-	 * GLOBALS ACCESSED: bit<r>
+	 * GLOBALS ACCESSED: {@code bit<r>}
 	 */
 	public void fmperm(int[] perm, int n){
 		int i, k, l;
@@ -94,7 +94,7 @@ public class Workspace{
 	 * represents the points in trivial cells of the partition, while mcr
 	 * represents those points which are least in their cells.
 	 * 
-	 * GLOBALS ACCESSED: bit<r>
+	 * GLOBALS ACCESSED: {@code bit<r>}
 	 */
 	public void fmptn(int[] lab, int[] ptn, int level, int n){
 		PruneRecord record = nextRecord();

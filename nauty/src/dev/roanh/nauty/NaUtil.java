@@ -4,6 +4,7 @@ import dev.roanh.nauty.ds.IntPtr;
 import dev.roanh.nauty.ds.NSet;
 import dev.roanh.nauty.struct.SparseGraph;
 
+@SuppressWarnings("javadoc")
 public class NaUtil{
 	private int[] workperm;
 	private int n;
@@ -66,7 +67,7 @@ public class NaUtil{
 	 * (*refproc)(), which must have the argument list of refine().
 	 * active may be arbitrarily changed.  invar is used for working storage.
 	 * First, (*refproc)() is called.  Then, if invarproc!=NULL and
-	 * |mininvarlev| <= level <= |maxinvarlev|, the routine (*invarproc)() is
+	 * {@code |mininvarlev| <= level <= |maxinvarlev|}, the routine (*invarproc)() is
 	 * used to compute a vertex-invariant which may refine the partition
 	 * further.  If it does, (*refproc)() is called again, using an active set
 	 * containing all but the first fragment of each old cell.  Unless g is a
@@ -150,7 +151,7 @@ public class NaUtil{
 	}
 	
 	/**
-	 * maketargetcell(g,lab,ptn,level,tcell,tcellsize,&cellpos,
+	 * maketargetcell(g,lab,ptn,level,tcell,tcellsize,cellpos,
 	 *                tc_level,digraph,hint,targetcell,m,n)
 	 * calls targetcell() to determine the target cell at the specified level
 	 * in the partition nest (lab,ptn).  It must be a nontrivial cell (if not,
@@ -161,7 +162,7 @@ public class NaUtil{
 	 * When a cell is chosen, tcell is set to its contents, *tcellsize to its
 	 * size, and cellpos to its starting position in lab.
 	 * 
-	 * GLOBALS ACCESSED: bit<r>
+	 * GLOBALS ACCESSED: {@code bit<r>}
 	 */
 	public void maketargetcell(
 			SparseGraph g,
@@ -198,7 +199,7 @@ public class NaUtil{
 	 * better be) and splits C in the two cells {tv} and C\{tv}, in that order.
 	 * It also sets the set active to contain just the element tc.
 	 * 
-	 * GLOBALS ACCESSED: bit<r>
+	 * GLOBALS ACCESSED: {@code bit<r>}
 	 */
 	public void breakout(int[] lab, int[] ptn, int level, int tc, int tv, NSet active){
 		int i, prev, next;
