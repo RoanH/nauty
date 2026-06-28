@@ -8,6 +8,7 @@ import java.util.Arrays;
  * worktop and fmptr variables in nauty.c.
  * @author Roan
  */
+@SuppressWarnings("javadoc")
 public class Workspace{
 	private final PruneRecord[] records;
 	private final boolean[] workperm;
@@ -63,18 +64,18 @@ public class Workspace{
 	 * contains those points are fixed by perm, while mcr contains the set of
 	 * those points which are least in their orbits.
 	 * 
-	 * GLOBALS ACCESSED: bit<r>
+	 * GLOBALS ACCESSED: {@code bit<r>}
 	 */
 	public void fmperm(int[] perm, int n){
 		int i, k, l;
 
 		Arrays.fill(workperm, 0, n, false);
-		PruneRecord record = nextRecord();
-		record.clear();
+		PruneRecord rec = nextRecord();
+		rec.clear();
 
 		for(i = 0; i < n; ++i){
 			if(perm[i] == i){
-				record.addElement(i);
+				rec.addElement(i);
 			}else if(!workperm[i]){
 				l = i;
 				do{
@@ -83,7 +84,7 @@ public class Workspace{
 					workperm[k] = true;
 				}while(l != i);
 
-				record.mcr().addElement(i);
+				rec.mcr().addElement(i);
 			}
 		}
 	}
@@ -94,7 +95,7 @@ public class Workspace{
 	 * represents the points in trivial cells of the partition, while mcr
 	 * represents those points which are least in their cells.
 	 * 
-	 * GLOBALS ACCESSED: bit<r>
+	 * GLOBALS ACCESSED: {@code bit<r>}
 	 */
 	public void fmptn(int[] lab, int[] ptn, int level, int n){
 		PruneRecord record = nextRecord();

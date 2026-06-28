@@ -6,6 +6,7 @@ import dev.roanh.nauty.ds.NSet;
 import dev.roanh.nauty.struct.SparseGraph;
 import dev.roanh.nauty.struct.StatsBlk;
 
+@SuppressWarnings("javadoc")
 public class NauSparse{
 	private static final int[] FUZZ1 = new int[]{037541, 061532, 005257, 026416};
 	private static final int[] FUZZ2 = new int[]{006532, 070236, 035523, 062437};
@@ -74,7 +75,7 @@ public class NauSparse{
 	/**
 	 * testcanlab_sg(g,canong,lab,samerows,m,n) compares g^lab to canong,
 	 * using an ordering which is immaterial since it's only used here.  The
-	 * value returned is -1,0,1 if g^lab <,=,> canong.  *samerows is set to
+	 * value returned is -1,0,1 if {@code g^lab <,=,> canong}.  *samerows is set to
 	 * the number of rows (0..n) of canong which are the same as those of g^lab.
 	 */
 	public int testcanlab_sg(SparseGraph g, SparseGraph canong, int[] lab, IntPtr samerows){

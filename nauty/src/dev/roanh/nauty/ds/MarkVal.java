@@ -9,6 +9,7 @@ import java.util.Arrays;
  * can even do much less often since we gain nothing from short CPU wise.
  * @author Roan
  */
+@SuppressWarnings("javadoc")
 public class MarkVal{
 	private int[] marks;
 	private int markVal = 1;

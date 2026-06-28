@@ -7,6 +7,7 @@ import dev.roanh.nauty.struct.SparseGraph;
 import dev.roanh.nauty.struct.StatsBlk;
 import dev.roanh.nauty.struct.TCNode;
 
+@SuppressWarnings("javadoc")
 public class Nauty{
 	/**
 	 * Max graph size is 2 billion.
@@ -95,7 +96,7 @@ public class Nauty{
 	 */
 	private int eqlev_canon;
 	/**
-	 * -1,0,1 according as code at eqlev_canon+1 is <,==,> that for bsf leaf.
+	 * -1,0,1 according as code at eqlev_canon+1 is {@code <,==,>} that for bsf leaf.
 	 * Also used for similar purpose during leaf processing
 	 */
 	private int comp_canon;
