@@ -2,6 +2,7 @@ package dev.roanh.nauty.struct;
 
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class SparseGraph{
 	/**
@@ -47,8 +48,16 @@ public class SparseGraph{
 		nde = e.length;
 		v = new int[d.length];
 		for(int i = 1; i < v.length; i++){
-			v[i] = v[i - 1] = d[i];
+			v[i] = v[i - 1] + d[i - 1];
 		}
+	}
+	
+	public SparseGraph(int[] v, int[] d, int[] e){
+		this.v = v;
+		this.d = d;
+		this.e = e;
+		nv = v.length;
+		nde = e.length;
 	}
 	
 	/**
@@ -94,6 +103,41 @@ public class SparseGraph{
 			}
 			out.println();
 		}
+	}
+	
+	public int[][] toAdjacencyLists(){
+		int[][] g = new int[nv][];
+		for(int i = 0; i < nv; i++){
+			int len = d[i];
+			g[i] = new int[len];
+			System.arraycopy(e, v[i], g[i], 0, len);
+		}
+		
+		return g;
+	}
+	
+	@Override
+	public boolean equals(Object obj){
+		if(obj instanceof SparseGraph g){
+			sort();
+			g.sort();
+			
+			return nv == g.nv
+				&& nde == g.nde
+				&& Arrays.equals(v, 0, nv, g.v, 0, nv)
+				&& Arrays.equals(d, 0, nv, g.d, 0, nv)
+				&& Arrays.equals(e, 0, nde, g.e, 0, nde);
+		}else{
+			return false;
+		}
+	}
+	
+	@Override
+	public int hashCode(){
+		int result = Objects.hash(nv, nde);
+		result = 31 * result + Arrays.hashCode(v);
+		result = 31 * result + Arrays.hashCode(d);
+		return 31 * result + Arrays.hashCode(e);
 	}
 	
 	public static void sgAlloc(SparseGraph sg, int nlen, int ndelen){

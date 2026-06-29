@@ -1,6 +1,10 @@
 package dev.roanh.nauty;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +17,16 @@ import dev.roanh.nauty.struct.SparseGraph;
  */
 public class NautyTest{
 	private final NautyApi nauty = new NautyApi();
+	private static final int[][] TEST_GRAPH = new int[][]{
+		new int[]{2, 3},
+		new int[]{},
+		new int[]{6},
+		new int[]{7},
+		new int[]{1},
+		new int[]{1},
+		new int[]{5},
+		new int[]{4}
+	};
 	
 	/*
 	 * Creating expected test output with nauty's Dreadnaut (2.8.6):
@@ -179,7 +193,6 @@ public class NautyTest{
 			new int[]{0, 2, 1, 3},
 			nauty.computeCanonicalLabelling(g, lab, ptn).getRelabelling()
 		);
-		
 	}
 	
 	@Test
@@ -203,6 +216,151 @@ public class NautyTest{
 			new int[]{0, 1, 2, 3},
 			nauty.computeCanonicalLabelling(g, lab, ptn).getRelabelling()
 		);
+	}
+	
+	@Test
+	public void fullCanon0() throws InterruptedException{
+		SparseGraph g = new SparseGraph(new int[][]{
+			new int[]{5},
+			new int[]{4},
+			new int[]{7, 6},
+			new int[]{},
+			new int[]{3},
+			new int[]{3},
+			new int[]{1},
+			new int[]{0},
+		});
 		
+		int[] lab = new int[]{4, 5, 6, 7, 0, 1, 2, 3};
+		int[] ptn = new int[]{0, 0, 1, 0, 1, 1, 1, 0};
+		
+		assertArrayEquals(
+			new int[]{4, 5, 6, 7, 2, 1, 0, 3},
+			nauty.computeCanonicalLabelling(g, lab, ptn).getRelabelling()
+		);
+	}
+
+	@Test
+	public void fullCanon1() throws InterruptedException{
+		SparseGraph g = new SparseGraph(new int[][]{
+			new int[]{5},
+			new int[]{4},
+			new int[]{7, 6},
+			new int[]{},
+			new int[]{3},
+			new int[]{3},
+			new int[]{0},
+			new int[]{1},
+		});
+		
+		int[] lab = new int[]{4, 5, 6, 7, 0, 1, 2, 3};
+		int[] ptn = new int[]{0, 0, 1, 0, 1, 1, 1, 0};
+		
+		assertArrayEquals(
+			new int[]{4, 5, 7, 6, 2, 1, 0, 3},
+			nauty.computeCanonicalLabelling(g, lab, ptn).getRelabelling()
+		);
+	}
+
+	@Test
+	public void fullCanon4() throws InterruptedException{
+		SparseGraph g = new SparseGraph(new int[][]{
+			new int[]{3},
+			new int[]{6},
+			new int[]{7, 5},
+			new int[]{4},
+			new int[]{},
+			new int[]{0},
+			new int[]{4},
+			new int[]{1},
+		});
+		
+		int[] lab = new int[]{2, 4, 5, 7, 6, 3, 0, 1};
+		int[] ptn = new int[]{0, 0, 1, 0, 0, 0, 1, 0};
+
+		assertTrue(Arrays.deepEquals(
+			TEST_GRAPH,
+			nauty.computeCanonicalLabelling(g, lab, ptn).getCanonicalGraph().toAdjacencyLists()
+		));
+	}
+
+	@Test
+	public void fullCanon5() throws InterruptedException{
+		SparseGraph g = new SparseGraph(new int[][]{
+			new int[]{3},
+			new int[]{6},
+			new int[]{7, 5},
+			new int[]{4},
+			new int[]{},
+			new int[]{0},
+			new int[]{4},
+			new int[]{1},
+		});
+		
+		int[] lab = new int[]{2, 4, 5, 7, 3, 6, 0, 1};
+		int[] ptn = new int[]{0, 0, 1, 0, 0, 0, 1, 0};
+
+		assertTrue(Arrays.deepEquals(
+			TEST_GRAPH,
+			nauty.computeCanonicalLabelling(g, lab, ptn).getCanonicalGraph().toAdjacencyLists()
+		));
+	}
+
+	@Test
+	public void fullCanon6() throws InterruptedException{
+		SparseGraph g = new SparseGraph(new int[][]{
+			new int[]{6},
+			new int[]{3},
+			new int[]{7, 5},
+			new int[]{4},
+			new int[]{},
+			new int[]{0},
+			new int[]{4},
+			new int[]{1},
+		});
+		
+		int[] lab = new int[]{2, 4, 5, 7, 3, 6, 0, 1};
+		int[] ptn = new int[]{0, 0, 1, 0, 0, 0, 1, 0};
+
+		assertTrue(Arrays.deepEquals(
+			TEST_GRAPH,
+			nauty.computeCanonicalLabelling(g, lab, ptn).getCanonicalGraph().toAdjacencyLists()
+		));
+	}
+
+	@Test
+	public void fullCanon() throws InterruptedException{
+		SparseGraph g2 = new SparseGraph(new int[][]{
+			new int[]{3},
+			new int[]{6},
+			new int[]{7, 5},
+			new int[]{4},
+			new int[]{},
+			new int[]{0},
+			new int[]{4},
+			new int[]{1},
+		});
+		
+		int[] lab2 = new int[]{2, 4, 5, 7, 3, 6, 0, 1};
+		int[] ptn2 = new int[]{0, 0, 1, 0, 0, 0, 1, 0};
+
+		SparseGraph g3 = new SparseGraph(new int[][]{
+			new int[]{6},
+			new int[]{3},
+			new int[]{7, 5},
+			new int[]{4},
+			new int[]{},
+			new int[]{0},
+			new int[]{4},
+			new int[]{1},
+		});
+		
+		int[] lab3 = new int[]{2, 4, 5, 7, 3, 6, 0, 1};
+		int[] ptn3 = new int[]{0, 0, 1, 0, 0, 0, 1, 0};
+
+		assertEquals(
+			nauty.computeCanonicalLabelling(g3, lab3, ptn3).getCanonicalGraph(),
+			nauty.computeCanonicalLabelling(g2, lab2, ptn2).getCanonicalGraph()
+		);
 	}
 }
