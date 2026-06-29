@@ -27,15 +27,13 @@ public class NaUtil{
 	 * GLOBALS ACCESSED: NONE
 	 */
 	public int orbjoin(int[] orbits, int[] map){
-		int i, j1, j2;
-
-		for(i = 0; i < n; ++i){
+		for(int i = 0; i < n; ++i){
 			if(map[i] != i){
-				j1 = orbits[i];
+				int j1 = orbits[i];
 				while(orbits[j1] != j1){
 					j1 = orbits[j1];
 				}
-				j2 = orbits[map[i]];
+				int j2 = orbits[map[i]];
 				while(orbits[j2] != j2){
 					j2 = orbits[j2];
 				}
@@ -48,8 +46,8 @@ public class NaUtil{
 			}
 		}
 
-		j1 = 0;
-		for(i = 0; i < n; ++i){
+		int j1 = 0;
+		for(int i = 0; i < n; ++i){
 			if((orbits[i] = orbits[orbits[i]]) == i){
 				++j1;
 			}
@@ -95,26 +93,22 @@ public class NaUtil{
 		    int mininvarlev,
 		    int maxinvarlev
 	    ){
-		
-		int pw;
-		int i, cell1, cell2, nc, minlev, maxlev;
-		long longcode;
-		boolean same;
+		int cell2;
 
 		nauSparse.refine_sg(g, lab, ptn, level, numcells, active, code);
 
-		minlev = (mininvarlev < 0 ? -mininvarlev : mininvarlev);
-		maxlev = (maxinvarlev < 0 ? -maxinvarlev : maxinvarlev);
+		int minlev = (mininvarlev < 0 ? -mininvarlev : mininvarlev);
+		int maxlev = (maxinvarlev < 0 ? -maxinvarlev : maxinvarlev);
 		if(numcells.val < n && level >= minlev && level <= maxlev){
 			nauSparse.adjacencies_sg(g, lab, ptn, level, invar);
 			active.clear();
-			for(i = n; --i >= 0;){
+			for(int i = n; --i >= 0;){
 				workperm[i] = invar[lab[i]];
 			}
-			nc = numcells.val;
-			for(cell1 = 0; cell1 < n; cell1 = cell2 + 1){
-				pw = workperm[cell1];
-				same = true;
+			int nc = numcells.val;
+			for(int cell1 = 0; cell1 < n; cell1 = cell2 + 1){
+				int pw = workperm[cell1];
+				boolean same = true;
 				for(cell2 = cell1; ptn[cell2] > level; ++cell2){
 					if(workperm[cell2 + 1] != pw){
 						same = false;
@@ -127,7 +121,7 @@ public class NaUtil{
 
 				SortTemplates.sortparallel(workperm, cell1, lab, cell1, cell2 - cell1 + 1);
 
-				for(i = cell1 + 1; i <= cell2; ++i){
+				for(int i = cell1 + 1; i <= cell2; ++i){
 					if(workperm[i] != workperm[i - 1]){
 						ptn[i - 1] = level;
 						++numcells.val;
@@ -138,7 +132,7 @@ public class NaUtil{
 
 			if(numcells.val > nc){
 				qinvar.val = 2;
-				longcode = code.val;
+				long longcode = code.val;
 				nauSparse.refine_sg(g, lab, ptn, level, numcells, active, code);
 				longcode = mash(longcode, code.val);
 				code.val = cleanup(longcode);
@@ -176,16 +170,16 @@ public class NaUtil{
 			int hint,
 			NauSparse nauSparse
 	    ){
-		int i, j, k;
+		int j;
 
-		i = nauSparse.targetcell_sg(g, lab, ptn, level, tc_level, hint);
+		int i = nauSparse.targetcell_sg(g, lab, ptn, level, tc_level, hint);
 		for(j = i + 1; ptn[j] > level; ++j){
 		}
 
 		tcellsize.val = j - i + 1;
 
 		tcell.clear();
-		for(k = i; k <= j; ++k){
+		for(int k = i; k <= j; ++k){
 			tcell.addElement(lab[k]);
 		}
 
@@ -202,16 +196,14 @@ public class NaUtil{
 	 * GLOBALS ACCESSED: {@code bit<r>}
 	 */
 	public void breakout(int[] lab, int[] ptn, int level, int tc, int tv, NSet active){
-		int i, prev, next;
-
 		active.clear();
 		active.addElement(tc);
 
-		i = tc;
-		prev = tv;
+		int i = tc;
+		int prev = tv;
 
 		do{
-			next = lab[i];
+			int next = lab[i];
 			lab[i++] = prev;
 			prev = next;
 		}while(prev != tv);

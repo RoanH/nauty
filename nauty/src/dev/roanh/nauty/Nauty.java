@@ -140,7 +140,6 @@ public class Nauty{
 	 */
 	private int alloc_n = 0;
 	
-	//TODO why pass orbits? its reset anyway?
 	public void nauty(SparseGraph g_arg, int[] lab, int[] ptn, StatsBlk stats_arg, int worksize, int n_arg, SparseGraph canong_arg) throws InterruptedException{
 		/* check for excessive sizes: */
 
@@ -280,21 +279,19 @@ public class Nauty{
 	 */
 	private int firstpathnode0(int[] lab, int[] ptn, int level, IntPtr numcells, TCNode tcnode_parent) throws InterruptedException{
 		int tv;
-		int tv1, index, rtnlevel;
+		int tv1, rtnlevel;
 		IntPtr tcellsize = new IntPtr();
 		IntPtr tc = new IntPtr();
 		IntPtr qinvar = new IntPtr();
 		IntPtr refcode = new IntPtr();
-		NSet tcell;
-		TCNode tcnode_this;
 
-		tcnode_this = tcnode_parent.next;
+		TCNode tcnode_this = tcnode_parent.next;
 		if(tcnode_this == null){
 			tcnode_this = new TCNode(alloc_n);
 			tcnode_parent.next = tcnode_this;
 			tcnode_this.next = null;
 		}
-		tcell = tcnode_this.tcellptr;
+		NSet tcell = tcnode_this.tcellptr;
 
 		++stats.numnodes;
 
@@ -340,7 +337,7 @@ public class Nauty{
 		}
 
 		/* use the elements of the target cell to produce the children: */
-		index = 0;
+		int index = 0;
 		for(tv1 = tv = tcell.nextelement(-1); tv >= 0; tv = tcell.nextelement(tv)){
 			if(orbits[tv] == tv){ /* ie, not equiv to previous child */
 				naUtil.breakout(lab, ptn, level + 1, tc.val, tv, active);
@@ -387,22 +384,19 @@ public class Nauty{
 	 */
 	private int othernode0(int[] lab, int[] ptn, int level, IntPtr numcells, TCNode tcnode_parent) throws InterruptedException{
 		int tv;
-		int tv1, rtnlevel;
+		int tv1;
 		IntPtr tcellsize = new IntPtr();
 		IntPtr tc = new IntPtr();
 		IntPtr refcode = new IntPtr();
 		IntPtr qinvar = new IntPtr();
-		short code;
-		NSet tcell;
-		TCNode tcnode_this;
 
-		tcnode_this = tcnode_parent.next;
+		TCNode tcnode_this = tcnode_parent.next;
 		if(tcnode_this == null){
 			tcnode_this = new TCNode(alloc_n);
 			tcnode_parent.next = tcnode_this;
 			tcnode_this.next = null;
 		}
-		tcell = tcnode_this.tcellptr;
+		NSet tcell = tcnode_this.tcellptr;
 
 		if(Thread.interrupted()){
 			throw new InterruptedException();
@@ -412,7 +406,7 @@ public class Nauty{
 
 		/* refine partition : */
 		naUtil.doref(g, lab, ptn, level, numcells, qinvar, workperm, active, refcode, nauSparse, mininvarlevel, maxinvarlevel);
-		code = (short)refcode.val;
+		short code = (short)refcode.val;
 		if(qinvar.val > 0){
 			++invapplics;
 			if(qinvar.val == 2){
@@ -460,7 +454,7 @@ public class Nauty{
 
 		/* call processnode to classify the type of this node: */
 
-		rtnlevel = processnode(lab, ptn, level, numcells.val);
+		int rtnlevel = processnode(lab, ptn, level, numcells.val);
 		if(rtnlevel < level){ /* keep returning if necessary */
 			return rtnlevel;
 		}

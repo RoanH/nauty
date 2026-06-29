@@ -44,24 +44,22 @@ public class NauSparse{
 		int[] d = g.d;
 		int[] e = g.e;
 		int[] v = g.v;
-		int i, pi, di;
-		int vi, vpi, j;
 
-		for(i = 0; i < n; ++i){
+		for(int i = 0; i < n; ++i){
 			if(p[i] != i || digraph){
-				pi = p[i];
-				di = d[i];
+				int pi = p[i];
+				int di = d[i];
 				if(d[pi] != di){
 					return false;
 				}
 
-				vi = v[i];
-				vpi = v[pi];
+				int vi = v[i];
+				int vpi = v[pi];
 				vmark1.reset();
-				for(j = 0; j < di; ++j){
+				for(int j = 0; j < di; ++j){
 					vmark1.mark(p[e[vi + j]]);
 				}
-				for(j = 0; j < di; ++j){
+				for(int j = 0; j < di; ++j){
 					if(vmark1.isNotMarked(e[vpi + j])){
 						return false;
 					}
@@ -83,23 +81,21 @@ public class NauSparse{
 		int[] e = g.e;
 		int[] cd = canong.d;
 		int[] ce = canong.e;
-		int i, k, di, dli;
-		int j, vi, vli;
 		int[] v = g.v;
 		int[] cv = canong.v;
 		int mina;
 
 		final int[] INVLAB = work1;
-		for(i = 0; i < n; ++i){
+		for(int i = 0; i < n; ++i){
 			INVLAB[lab[i]] = i;
 		}
 
-		for(i = 0; i < n; ++i){
+		for(int i = 0; i < n; ++i){
 			/* compare g[lab[i]]^INVLAB to canong[i] */
-			vi = cv[i];
-			di = cd[i];
-			vli = v[lab[i]];
-			dli = d[lab[i]];
+			int vi = cv[i];
+			int di = cd[i];
+			int vli = v[lab[i]];
+			int dli = d[lab[i]];
 
 			if(di != dli){
 				samerows.val = i;
@@ -111,12 +107,12 @@ public class NauSparse{
 
 			vmark1.reset();
 			mina = n;
-			for(j = 0; j < di; ++j){
+			for(int j = 0; j < di; ++j){
 				vmark1.mark(ce[vi + j]);
 			}
 
-			for(j = 0; j < di; ++j){
-				k = INVLAB[e[vli + j]];
+			for(int j = 0; j < di; ++j){
+				int k = INVLAB[e[vli + j]];
 				if(vmark1.isMarked(k)){
 					vmark1.unmark(k);
 				}else if(k < mina){
@@ -126,8 +122,8 @@ public class NauSparse{
 
 			if(mina != n){
 				samerows.val = i;
-				for(j = 0; j < di; ++j){
-					k = ce[vi + j];
+				for(int j = 0; j < di; ++j){
+					int k = ce[vi + j];
 					if(vmark1.isMarked(k) && k < mina){
 						return -1;
 					}
@@ -150,17 +146,17 @@ public class NauSparse{
 		int[] e = g.e;
 		int[] cd = canong.d;
 		int[] ce = canong.e;
-		int i, dli;
+		int dli;
 		int[] v = g.v;
 		int[] cv = canong.v;
-		int vli, j, k;
+		int k;
 
 		final int[] INVLAB = work1;
 
 		canong.nv = n;
 		canong.nde = g.nde;
 
-		for(i = 0; i < n; ++i){
+		for(int i = 0; i < n; ++i){
 			INVLAB[lab[i]] = i;
 		}
 
@@ -170,11 +166,11 @@ public class NauSparse{
 			k = cv[samerows - 1] + cd[samerows - 1];
 		}
 
-		for(i = samerows; i < n; ++i){
+		for(int i = samerows; i < n; ++i){
 			cv[i] = k;
 			cd[i] = dli = d[lab[i]];
-			vli = v[lab[i]];
-			for(j = 0; j < dli; ++j){
+			int vli = v[lab[i]];
+			for(int j = 0; j < dli; ++j){
 				ce[k++] = INVLAB[e[vli + j]];
 			}
 		}
@@ -201,28 +197,25 @@ public class NauSparse{
 	private void distvals(SparseGraph g, int v0, int[] dist){
 		int[] d = g.d;
 		int[] e = g.e;
-		int i, head, tail;
-		int di, k;
 		int[] v = g.v;
-		int vi, j;
 
 		final int[] QUEUE = work4;
 
-		for(i = 0; i < n; ++i){
+		for(int i = 0; i < n; ++i){
 			dist[i] = n;
 		}
 
 		QUEUE[0] = v0;
 		dist[v0] = 0;
 
-		head = 0;
-		tail = 1;
+		int head = 0;
+		int tail = 1;
 		while(tail < n && head < tail){
-			i = QUEUE[head++];
-			vi = v[i];
-			di = d[i];
-			for(j = 0; j < di; ++j){
-				k = e[vi + j];
+			int i = QUEUE[head++];
+			int vi = v[i];
+			int di = d[i];
+			for(int j = 0; j < di; ++j){
+				int k = e[vi + j];
 				if(dist[k] == n){
 					dist[k] = dist[i] + 1;
 					QUEUE[tail++] = k;
@@ -247,11 +240,10 @@ public class NauSparse{
 	public void refine_sg(SparseGraph g, int[] lab, int[] ptn, int level, IntPtr numcells, NSet active, IntPtr code){
 		int i, j, k, l, v1, v2, v3, isplit;
 		int w1, w2, w3;
-		long longcode;
 		int[] d = g.d;
 		int[] e = g.e;
 		int size, bigsize, bigpos;
-		int nactive, hitcells;
+		int hitcells;
 		int lj, di, splitv;
 		boolean trivsplit;
 		int[] v = g.v;
@@ -262,11 +254,11 @@ public class NauSparse{
 		final int[] HITS = work3;
 		final int[] HITCELL = work4;
 
-		longcode = numcells.val;
+		long longcode = numcells.val;
 
 		/* Set ACTIVE[0..nactive-1] = queue of active cell starts */
 
-		nactive = 0;
+		int nactive = 0;
 		for(i = -1; (i = active.nextelement(i)) >= 0;){
 			ACTIVE[nactive++] = i;
 		}
@@ -679,7 +671,7 @@ public class NauSparse{
 	 * partition finer than one for which it returns TRUE.
 	 */
 	public boolean cheapautom_sg(int[] ptn, int level, boolean digraph){
-		if(digraph){//TODO technically always true (?)
+		if(digraph){//TODO technically always true with my settings (?)
 			return false;
 		}
 
@@ -818,13 +810,10 @@ public class NauSparse{
 	public void adjacencies_sg(SparseGraph g, int[] lab, int[] ptn, int level, int[] invar){
 		int[] d = g.d;
 		int[] e = g.e;
-		int vwt, wwt;
-		int di;
-		int i;
 		int[] v = g.v;
 
-		vwt = 1;
-		for(i = 0; i < n; ++i){
+		int vwt = 1;
+		for(int i = 0; i < n; ++i){
 			work2[lab[i]] = vwt;
 			if(ptn[i] <= level){
 				++vwt;
@@ -832,10 +821,10 @@ public class NauSparse{
 			invar[i] = 0;
 		}
 
-		for(i = 0; i < n; ++i){
+		for(int i = 0; i < n; ++i){
 			vwt = fuzz1(work2[i]);
-			wwt = 0;
-			di = d[i];
+			int wwt = 0;
+			int di = d[i];
 			for(int j = 0; j < di; ++j){
 				wwt = accum(wwt, fuzz2(work2[e[v[i] + j]]));
 				invar[e[v[i] + j]] = accum(invar[e[v[i] + j]], vwt);
