@@ -363,4 +363,70 @@ public class NautyTest{
 			nauty.computeCanonicalLabelling(g2, lab2, ptn2).getCanonicalGraph()
 		);
 	}
+	
+	@Test
+	public void largerGraph() throws InterruptedException{
+		SparseGraph g = new SparseGraph(new int[][]{
+		    new int[]{1, 4, 15, 16, 17},
+		    new int[]{0, 2, 18},
+		    new int[]{1, 3, 19},
+		    new int[]{2, 4, 20},
+		    new int[]{0, 3, 5},
+		    new int[]{4, 6, 21},
+		    new int[]{5, 7, 22},
+		    new int[]{6, 8, 23},
+		    new int[]{7, 9},
+		    new int[]{8, 10, 24},
+		    new int[]{9, 11},
+		    new int[]{10, 12, 25},
+		    new int[]{11, 13},
+		    new int[]{12, 14, 26},
+		    new int[]{13, 15},
+		    new int[]{0, 14, 27},
+		    new int[]{17, 20, 31, 0, 32},
+		    new int[]{16, 18, 1},
+		    new int[]{17, 19, 2},
+		    new int[]{18, 20, 3},
+		    new int[]{16, 19, 21},
+		    new int[]{20, 22, 5},
+		    new int[]{21, 23, 6},
+		    new int[]{22, 24, 7},
+		    new int[]{23, 25, 9},
+		    new int[]{24, 26, 11},
+		    new int[]{25, 27, 13},
+		    new int[]{26, 28, 15},
+		    new int[]{27, 29},
+		    new int[]{28, 30},
+		    new int[]{29, 31},
+		    new int[]{16, 30},
+		    new int[]{33, 36, 47, 16},
+		    new int[]{32, 34},
+		    new int[]{33, 35},
+		    new int[]{34, 36},
+		    new int[]{32, 35, 37},
+		    new int[]{36, 38},
+		    new int[]{37, 39},
+		    new int[]{38, 40},
+		    new int[]{39, 41},
+		    new int[]{40, 42},
+		    new int[]{41, 43},
+		    new int[]{42, 44},
+		    new int[]{43, 45},
+		    new int[]{44, 46},
+		    new int[]{45, 47},
+		    new int[]{32, 46}
+		});
+		
+		int[] lab = new int[48];
+		int[] ptn = new int[48];
+		for(int i = 0; i < 48; i++){
+			lab[i] = i;
+			ptn[i] = 1;
+		}
+		
+		assertArrayEquals(
+			new int[]{41, 42, 40, 43, 44, 45, 46, 39, 38, 34, 10, 8, 12, 35, 37, 47, 33, 14, 28, 29, 30, 31, 9, 7, 23, 6, 11, 24, 22, 5, 21, 36, 3, 19, 2, 4, 25, 13, 26, 15, 27, 18, 1, 17, 32, 20, 0, 16},
+			nauty.computeCanonicalLabelling(g, lab, ptn).getRelabelling()
+		);
+	}
 }
