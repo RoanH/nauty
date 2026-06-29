@@ -7,6 +7,7 @@ public class CanonicalResult{
 	private final int[] relabelling;
 	private final SparseGraph canonicalGraph;
 	private final StatsBlk stats;
+	private int[] invRelab = null;
 	
 	public CanonicalResult(int[] relabelling, SparseGraph canonGraph, StatsBlk stats){
 		this.relabelling = relabelling;
@@ -23,13 +24,19 @@ public class CanonicalResult{
 		return canonicalGraph;
 	}
 	
+	public int remap(int original){
+		return getInverseRelabelling()[original];
+	}
+	
 	public int[] getInverseRelabelling(){
-		int[] inv = new int[relabelling.length];
- 		for(int i = 0; i < relabelling.length; i++){
-			inv[relabelling[i]] = i;
+		if(invRelab == null){
+			invRelab = new int[relabelling.length];
+	 		for(int i = 0; i < relabelling.length; i++){
+	 			invRelab[relabelling[i]] = i;
+			}
 		}
  		
- 		return inv;
+ 		return invRelab;
 	}
 	
 	public int[] getRelabelling(){
