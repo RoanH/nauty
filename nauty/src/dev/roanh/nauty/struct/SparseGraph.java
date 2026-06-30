@@ -4,6 +4,10 @@ import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * Main graph data structure used in sparse nauty.
+ * @author Roan
+ */
 public class SparseGraph{
 	/**
 	 * Number of directed edges (loops contribute only 1).
@@ -26,9 +30,19 @@ public class SparseGraph{
 	 */
 	public int[] e;
 	
+	/**
+	 * Constructs a new uninitialised sparse graph.
+	 * @see #sgAlloc(SparseGraph, int, int)
+	 */
 	public SparseGraph(){
 	}
 	
+	/**
+	 * Constructs a new empty sparse graph with room
+	 * for the given number of vertices and directed edges.
+	 * @param vertices The number of vertices.
+	 * @param edges The number of edges.
+	 */
 	public SparseGraph(int vertices, int edges){
 		sgAlloc(this, vertices, edges);
 		nv = vertices;
@@ -52,6 +66,12 @@ public class SparseGraph{
 		}
 	}
 	
+	/**
+	 * Constructs a sparse graph from the given array.
+	 * @param v Array of indexes into e[*] where each vertex starts.
+	 * @param d Array with out-degree of each vertex.
+	 * @param e Array with lists of neighbours for each vertex.
+	 */
 	public SparseGraph(int[] v, int[] d, int[] e){
 		this.v = v;
 		this.d = d;
@@ -95,6 +115,10 @@ public class SparseGraph{
 		}
 	}
 	
+	/**
+	 * Prints this graph to the given stream.
+	 * @param out The stream to write to.
+	 */
 	public void print(PrintStream out){
 		for(int i = 0; i < nv; i++){
 			out.print(i + " : " );
@@ -105,6 +129,11 @@ public class SparseGraph{
 		}
 	}
 	
+	/**
+	 * Converts this graph to a 2D array adjacency list representation.
+	 * Each index contains an array the neighbours of that vertex.
+	 * @return The 2D adjacency list representation of this graph.
+	 */
 	public int[][] toAdjacencyLists(){
 		int[][] g = new int[nv][];
 		for(int i = 0; i < nv; i++){
@@ -140,6 +169,12 @@ public class SparseGraph{
 		return 31 * result + Arrays.hashCode(e);
 	}
 	
+	/**
+	 * Allocates array with sufficient space in the given graph if not yet available.
+	 * @param sg The graph to allocate space in.
+	 * @param nlen The number of vertices.
+	 * @param ndelen The number of directed edges.
+	 */
 	public static void sgAlloc(SparseGraph sg, int nlen, int ndelen){
 		if(sg.v == null || sg.v.length < nlen){
 			sg.v = new int[nlen];

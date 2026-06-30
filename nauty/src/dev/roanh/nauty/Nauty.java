@@ -693,7 +693,6 @@ public class Nauty{
 		}
 	}
 	
-	//original macro depends on reference passing
 	private static void multiply(StatsBlk stats, int index){
 		if((stats.grpsize1 *= index) >= 1e10){
 			stats.grpsize1 /= 1e10;

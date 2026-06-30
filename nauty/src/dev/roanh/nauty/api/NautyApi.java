@@ -6,13 +6,34 @@ import dev.roanh.nauty.struct.SparseGraph;
 import dev.roanh.nauty.struct.StatsBlk;
 
 /**
- * More Java style interface to nauty.
+ * More Java style interface to nauty. Note that instances of this class
+ * are not thread safe.
  * @author Roan
+ * @see <a href="https://pallini.di.uniroma1.it/Guide.html">nauty and Traces User’s Guide</a>
  */
 public class NautyApi{
+	/**
+	 * Nauty instance used to calculate results.
+	 */
 	private final Nauty nauty = new Nauty();
 	
-	//relab = labels
+	/**
+	 * Computes the canonical form of the given graph with the given colouring.
+	 * @param graph The directed input graph.
+	 * @param labels The array containing all the vertex indices for the color information,
+	 *        combined with the ptn array this describes the graph coloring. Note: this
+	 *        array will be <b>modified</b> by nauty to contain the graph relabelling when this
+	 *        method returns, see {@link CanonicalResult#getRelabelling()}.
+	 * @param ptn Array indicating at which indices in the labels array a new block of vertices
+	 *        with the same color starts. Start indices will have a value of 0 while
+	 *        all other indices will have a value of 1. More information is available in the
+	 *        nauty & Traces user manual.
+	 * @return The computed canonisation result.
+	 * @throws InterruptedException When the current thread is interrupted while running nauty.
+	 * @see SparseGraph
+	 * @see CanonicalResult
+	 * @see <a href="https://pallini.di.uniroma1.it/Guide.html">nauty and Traces User’s Guide</a>
+	 */
 	public CanonicalResult computeCanonicalLabelling(SparseGraph graph, int[] labels, int[] ptn) throws InterruptedException{
 		SparseGraph canon = new SparseGraph();
 		StatsBlk stats = new StatsBlk();
