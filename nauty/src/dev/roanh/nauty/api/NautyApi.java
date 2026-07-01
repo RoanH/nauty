@@ -27,7 +27,7 @@ public class NautyApi{
 	 * @param ptn Array indicating at which indices in the labels array a new block of vertices
 	 *        with the same color starts. Start indices will have a value of 0 while
 	 *        all other indices will have a value of 1. More information is available in the
-	 *        nauty & Traces user manual.
+	 *        nauty and Traces User’s Guide.
 	 * @return The computed canonisation result.
 	 * @throws InterruptedException When the current thread is interrupted while running nauty.
 	 * @see SparseGraph
