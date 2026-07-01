@@ -56,7 +56,9 @@ verify:
 
 javadoc:
   script:
+    - cd nauty/src/dev/roanh/nauty/api
     - ./gradlew -PrefName=${CI_COMMIT_REF_NAME} -PnexusPublic=${NEXUS_PUBLIC} javadoc
+    - cd ../../../../../..
     - mv ./build/docs/javadoc ../
   stage: javadoc
   artifacts:
