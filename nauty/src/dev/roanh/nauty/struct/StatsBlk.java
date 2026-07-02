@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 Roan Hofland (this Java port)
+ * Copyright 2026 Roan Hofland (roan@roanh.dev) (this Java port)
  * Copyright 2004 Brendan McKay (the original C source adapted here)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
