@@ -99,8 +99,8 @@ publishing{
 				url = 'https://github.com/RoanH/nauty'
 				licenses{
 					license{
-						name = 'GNU General Public License v3.0'
-						url = 'https://www.gnu.org/licenses/gpl-3.0.txt'
+						name = 'Apache License v2.0'
+						url = 'http://www.apache.org/licenses/LICENSE-2.0'
 					}
 				}
 				developers{
