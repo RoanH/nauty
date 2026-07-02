@@ -42,12 +42,12 @@ public class Nauty{
 	 * make canong and canonlab?
 	 * Fixed to true for now.
 	 */
-	private final boolean getcanon = true;
+	private static final boolean getcanon = true;
 	/**
 	 * multiple edges or loops?
 	 * Fixed to true for now.
 	 */
-	private final boolean digraph = true;
+	private static final boolean digraph = true;
 	/**
 	 * max level for smart target cell choosing
 	 */

@@ -15,5 +15,25 @@
       <Bug pattern="CT_CONSTRUCTOR_THROW"/>
     </Or>
   </Match>
+  
+  <Match>
+    <!-- Modifying internal state is the C way, so nauty uses this everywhere -->
+    <Bug pattern="PA_PUBLIC_PRIMITIVE_ATTRIBUTE"/>
+    <Class name="dev.roanh.nauty.struct.SparseGraph"/>
+  </Match>
+  
+  <Match>
+    <!-- code is only set to valid switch branches -->
+    <Bug pattern="SF_SWITCH_NO_DEFAULT"/>
+    <Class name="Nauty"/>
+    <Method name="processnode"/>
+  </Match>
+  
+  <Match>
+    <!-- prepare is the true constructor -->
+    <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
+    <Class name="NaUtil"/>
+    <Field name="workperm"/>
+  </Match>
 
 </FindBugsFilter>
