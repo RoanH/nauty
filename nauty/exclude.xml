@@ -25,14 +25,14 @@
   <Match>
     <!-- code is only set to valid switch branches -->
     <Bug pattern="SF_SWITCH_NO_DEFAULT"/>
-    <Class name="Nauty"/>
+    <Class name="dev.roanh.nauty.Nauty"/>
     <Method name="processnode"/>
   </Match>
   
   <Match>
     <!-- prepare is the true constructor -->
     <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
-    <Class name="NaUtil"/>
+    <Class name="dev.roanh.nauty.NaUtil"/>
     <Field name="workperm"/>
   </Match>
 
